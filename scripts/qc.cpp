@@ -1,6 +1,5 @@
 #include <iostream>
 #include "GZPair.h"
-#include "QualityCheck.h"
 
 string call_id;
 string sample;
@@ -20,25 +19,12 @@ int main(int argc, char** argv) {
 	string outputPath = "../data/output";
 	GZPair gp(p1, p2,outputPath);
 
-	/*
 	gp.testFunc();
 	vector<string> lines1 = gp.getLines1();
 
-	QualityCheck qc;
+	QualityCheck qc = gp.returnQc();
 
-	cout << lines1.at(1) << endl;
-
-	qc.parseReadsLine(lines1.at(1));
-	*/
-
-	vector<int> vi;
-	vi.push_back(0);
-	vector<int>::iterator iter = vi.begin();
-	cout << *iter << endl;
-	vi.push_back(0);
-	iter++;
-	cout << *iter << endl;
-	//iter++;
+	qc.printMetrics();
 
 	return 0;
 }

@@ -19,64 +19,95 @@ class QualityCheck {
 	long passedReads 	= 0;
 	double effectiveRate 	= 0;
 
-	double Q30 = 0;
-	double Q20 = 0;
-	double GC  = 0;
+	long lineQualSum 	= 0;
+
+	long q30Bases	= 0;
+	long q20Bases	= 0;
+	long q10Bases 	= 0;
+	long q4Bases	= 0;
+	long lowQualBases = 0;
+
 	double genomeCoverage = 0;
 	long meanDepth = 0;
 	double mappedRate = 0;
 
-	map<char, vector<int>> perPosCounts;
-	map<char, vector<int>> tmp_perPosCounts;
-	map<int, int> perGcReadsCounts;
-	map<int, int> perNsReadsCounts;
-	map<int, int> perBaseReadsCounts;
+	map<char, vector<int>> 	perPosCounts;
+	map<char, vector<bool>>	tmp_perPosCounts;
+	vector<int> 		perPosTotQual;
+
+	map<int, int>	perGcReadsCounts;
+	map<int, int>	perNsReadsCounts;
+	map<int, int>	perBaseReadsCounts;
+	map<int, int>	perQualBasesCounts;
 
 	vector<char> geneType = {'G', 'C', 'A', 'T', 'N'};
 
-	// init iterators
-	void initPerPosCountsIter() {
-		char key;
-		for(	auto iter = geneType.begin();
-			iter != geneType.end(); iter++) {
-
-			key = *iter;
-
-			perPosCounts[key].push_back(0);
-			perPosCountsIter[key] = perPosCounts[key].begin();
-		}
-	}
-
-	void iterPlusPerPosCountsIter() {
+	void addTmpPos(char targetKey) {
 
 		char key;
-		for(	auto geneIter = perPosCountsIter.begin();
-			geneIter != perPosCountsIter.end(); geneIter++) {
 
-			key = geneIter->first;
-			cout << "key1: " << key << endl;
-			cout << "cur pos value: " << *geneIter->second << endl;
-			
-			// if empty, init as 0
-			if (geneIter->second + 1 == perPosCounts[key].end()) {
-				
-				cout << "inited to zero" << endl;
-				perPosCounts[key].push_back(0);
-			}
-			geneIter->second++;
-		}
-	}
+		//cout << "perPosCounts size: " << perPosCounts.size() << endl;
+		//cout << "key: " << endl;
+		for(	auto k : geneType ) {
 
-	void resetPosPerPosCountsIter() {
+			key = k;
 
-		char key;
-		for(	auto geneIter = perPosCountsIter.begin();
-			geneIter != perPosCountsIter.end(); geneIter++) {
-
-			key = geneIter->first;
 			// pos ++
-			geneIter->second = perPosCounts[key].begin();
+			if(key == targetKey){
+
+				tmp_perPosCounts[key].push_back(true);
+			}
+			else{
+
+				tmp_perPosCounts[key].push_back(false);
+			}
 		}
+
+	}
+
+	void flushTmp() {
+		//int lenTot = 0;
+		//int lenTmp = 0;
+
+		char key;
+
+		for(	auto k : geneType) {
+
+			key = k;
+
+			// can deleted
+			//int lenTot = perPosCounts->size();
+			//int lenTmp = tmp_perPosCounts->size();
+
+			auto totIter = perPosCounts[key].begin();
+			auto tmpIter = tmp_perPosCounts[key].begin();
+
+			for (   ; totIter != perPosCounts[key].end() 
+				&& tmpIter != tmp_perPosCounts[key].end()
+				; totIter++) {
+
+				// if gene is on this pos
+				if(*tmpIter){
+					(*totIter)++;
+				}
+
+				tmpIter++;
+			}
+
+			// push back new to total, if tmp is not over
+			for (; tmpIter != tmp_perPosCounts[key].end(); tmpIter++) {
+				if(*tmpIter){
+					perPosCounts[key].push_back(1);
+				}
+				else {
+					perPosCounts[key].push_back(0);
+				}
+			}
+
+		}
+
+		//cout << "tmp size: " << tmp_perPosCounts.size() << endl;
+		tmp_perPosCounts.clear();
 	}
 
 	void addPerGcReadsCounts() {
@@ -137,35 +168,87 @@ class QualityCheck {
 	// Constructor
 	QualityCheck() {
 
-		initPerPosCountsIter();
+	}
+
+	void printMetrics() {
+
+		cout << "rawReads:\t" << rawReads << endl;
+		cout << "rawBases:\t" << rawBases << endl;
+		cout << "passedReads:\t" << passedReads << endl;
+		cout << "effectiveReads:\t" << effectiveReads << endl;
+		cout << "effectiveBases:\t" << effectiveBases << endl;
+		cout << "rawGcBases:\t" << rawGcBases << endl;
+		cout << "excessNReads:\t" << excessNReads << endl;
+
+	}
+
+	void printPosData(char key) {
+
+		//cout << "perPosCounts[key] length: " << perPosCounts[key].size() << endl;
+		for (auto i : perPosCounts[key]) {
+			cout << i << endl;
+		}
+
 	}
 
 	void parseGene(char gene) {
-		rawBases++;
+		lineBases++;
 
 		switch(gene){
 			case 'G':
 				lineGcBases++;
 				// count++
-				(*perPosCountsIter['G'])++;
+				addTmpPos('G');
 				break;
 			case 'C':
 				lineGcBases++;
-				(*perPosCountsIter['C'])++;
+				addTmpPos('C');
 				break;
 			case 'A':
-				(*perPosCountsIter['A'])++;
+				addTmpPos('A');
 				break;
 			case 'T':
-				(*perPosCountsIter['T'])++;
+				addTmpPos('T');
 				break;
 			case 'N':
 				lineNBases++;
-				(*perPosCountsIter['N'])++;
+				addTmpPos('N');
 				break;
 			default:
 				cerr << "Warning:\n\t" << "\tunknown base?" << endl;
 				break;	
+		}
+	}
+
+	void parseQual(char qualCh) {
+
+		// char to int
+		int qual = qualCh - 33;
+
+		lineQualSum += qual;
+
+		if(qual >= 30) {
+			q30Bases++;
+			q20Bases++;
+			q10Bases++;
+			q4Bases++;
+		}
+		else if(qual >= 20) {
+			q20Bases++;
+			q10Bases++;
+			q4Bases++;
+		}
+		else if(qual >= 10) {
+			q10Bases++;
+			q4Bases++;
+			lowQualBases++;
+		}
+		else if(qual >= 4) {
+			q4Bases++;
+			lowQualBases++;
+		}
+		else {
+			lowQualBases++;
 		}
 
 	}
@@ -177,9 +260,6 @@ class QualityCheck {
 		lineNBases  = 0;
 		lineBases = 0;
 
-		// init pos
-		resetPosPerPosCountsIter();
-
 		// first iter
 		auto siter = line.begin();
 		parseGene(*siter);
@@ -188,10 +268,12 @@ class QualityCheck {
 		for(siter++; siter!= line.end(); siter++) {
 
 			// shift pos
-			iterPlusPerPosCountsIter();
-			cout << "current gene before parse: " << *siter << endl;
+			//cout << "current gene before parse: " << *siter << endl;
 			parseGene(*siter);
 		}
+
+		// flush tmp vector
+		flushTmp();
 
 		// add line metrics to total
 		rawReads++;

@@ -1,4 +1,5 @@
 #include "GZ.h"
+#include "QualityCheck.h"
 
 class GZPair 
 {
@@ -61,10 +62,16 @@ public:
 		return this->gzPair;
 	}
 
+	QualityCheck returnQc() {
+		return this->qc;
+	}
+
 	// test
 	void testFunc() 
 	{
-		this->readLines();
+		for (int i = 0; i < 100; i++){
+			this->readLines();
+		}
 	}
 
 	// split file
@@ -175,6 +182,8 @@ private:
 	GZ gz1;
 	GZ gz2;
 
+	QualityCheck qc;
+
 	vector<string> lines1;
 	vector<string> lines2;
 
@@ -185,7 +194,7 @@ private:
 	string wpath;
 
 	// seperator
-	char sep1 = '\t'; 
+	char sep1 = '\n'; 
 	char sep2 = '\n'; 
 
 	char eol = '\n'; 
@@ -244,6 +253,11 @@ private:
 			// add end of line
 			s1.assign(buf1);
 			s2.assign(buf2);
+
+			if (i == 1) {
+				qc.parseReadsLine(s1);
+			}
+
 			// 4th line special
 			if (i == 3) {
 				s1.push_back(sep2);

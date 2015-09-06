@@ -27,7 +27,7 @@ class QualityCheck {
 	double mappedRate = 0;
 
 	map<char, vector<int>> perPosCounts;
-	map<char, vector<int>::iterator> perPosCountsIter;
+	map<char, vector<int>> tmp_perPosCounts;
 	map<int, int> perGcReadsCounts;
 	map<int, int> perNsReadsCounts;
 	map<int, int> perBaseReadsCounts;

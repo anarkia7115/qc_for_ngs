@@ -26,6 +26,15 @@ int main(int argc, char** argv) {
 
 	qc.printMetrics();
 
+	auto v = qc.getQualVec();
+
+	cout << "len: " << v.size() << endl;
+
+	for (auto i : v) {
+
+		cout << i << endl;
+	}
+
 	return 0;
 }
 

@@ -24,11 +24,11 @@ int main(int argc, char** argv) {
 
 	QualityCheck qc = gp.returnQc();
 
-	qc.printMetrics();
+	//qc.printMetrics();
 
 	auto v = qc.getQualVec();
 
-	cout << "len: " << v.size() << endl;
+	//cout << "len: " << v.size() << endl;
 
 	for (auto i : v) {
 
@@ -38,4 +38,9 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+pair<double, double> calcQuantile(vector<int> v) {
 
+	n = v.size();
+
+
+}

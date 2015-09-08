@@ -245,6 +245,7 @@ class QualityCheck {
 		// push value to the right position
 		switch(curPos) {
 			case 0:
+				//cout << "in case 0: " << endl;
 			case 1:
 			case 2:
 			case 3:
@@ -511,6 +512,7 @@ class QualityCheck {
 
 	vector<int> getQualVec() {
 		
+		cout << "key: " << perPosAggVal.begin()->first << endl;
 		return perPosAggVal.begin()->second.qualVals;
 	}
 
@@ -569,6 +571,7 @@ class QualityCheck {
 
 	void parseQual(char qualCh) {
 
+
 		// char to int
 		int qual = qualCh - 33;
 
@@ -604,6 +607,7 @@ class QualityCheck {
 			lineLowQualBases++;
 		}
 
+		curPos++;
 	}
 
 	void parseReadsLine(string line) {
@@ -642,6 +646,7 @@ class QualityCheck {
 	}
 
 	void parseQualLine(string line) {
+		//cout << "in parseQualLine." << endl;
 
 		// init
 		lineQualSum  = 0;
@@ -661,7 +666,6 @@ class QualityCheck {
 			//<< "current gene before parse: " 
 			//<< *siter << endl;
 			parseQual(*siter);
-			curPos++;
 		}
 
 		// flush tmp

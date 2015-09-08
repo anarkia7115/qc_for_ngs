@@ -1,0 +1,18 @@
+x <- 1:100
+n <- length(x)
+probs = c(0.25, 0.75)
+index <- 1 + (n - 1) * probs
+lo <- floor(index)
+hi <- ceiling(index)
+x <- sort(x, partial = unique(c(lo, hi)))
+qs <- x[lo]
+i <- which(index > lo)
+h <- (index - lo)[i]
+qs[i] <- (1 - h) * qs[i] + h * x[hi[i]]
+qs
+
+lower quantile = Q1 - 1.5*IQR
+higher quantile = Q3 -1.5*IQR
+IQR = qs[2] -qs[1]
+lowest = qs[1] - 1.5*IQR
+highest = qs[2] + 1.5*IQR

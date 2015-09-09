@@ -57,14 +57,19 @@ class QualityCheck {
 	// aggregate values
 	struct AggVal {
 
+		int key = 0;
 		long sum = 0;
 		long count = 0;
 		double mean = 0;
+
 		double median = 0;
-		double lowerQ = 0;
-		double upperQ = 0;
-		int lowest = 9999;
-		int highest = 0;
+
+		double lowest = 9999;
+		double highest = 0;
+
+		int q1 = 0;
+		int q3 = 0;
+
 		vector<int> qualVals;
 
 	} ;
@@ -470,23 +475,23 @@ class QualityCheck {
 		double median;
 		size_t size = v.size();
 
-		auto const Q1 = size / 4;
-		auto const Q2 = size / 2;
-		auto const Q3 = Q1 + Q2;
-
-		std::nth_element(v.begin(),          v.begin() + Q1, v.end());
-		std::nth_element(v.begin() + Q1 + 1, v.begin() + Q2, v.end());
-		std::nth_element(v.begin() + Q2 + 1, v.begin() + Q3, v.end());
+		int a = 0, b = 0;
 
 		if (size % 2 == 0) {
-			median = (v[size / 2 - 1] + v[size / 2]) / 2;
+			std::nth_element(v.begin()
+					, v.begin() + size / 2 - 1, v.end());
+			a = v[size / 2 - 1];
+			b = v[size / 2];
+
+			median = (a + b) / 2;
 		}
 		else {
+			std::nth_element(v.begin()
+					, v.begin() + size / 2, v.end());
+			median = v[size / 2];
 		}
 
 		av.median  = median;
-		av.lowest  = v.front();
-		av.highest = v.back();
 	}
 
 	void calcMean(AggVal& av) {
@@ -503,6 +508,98 @@ class QualityCheck {
 		av.mean = double(sum) / double(v.size());
 	}
 
+	void calcQuartile(AggVal& av) {
+
+		vector<int> v = av.qualVals;
+
+		int n = v.size();
+
+		vector<double> probs = {0.25, 0.75};
+
+		vector<double> index;
+
+		for (auto d : probs) {
+
+			index.push_back(1 + (n - 1) * d);
+		}
+
+		vector<int> lo;
+		vector<int> hi;
+		vector<int> set;
+
+		int f = 0, c = 0;
+
+		for (auto d : index) {
+			f = floor(d);
+			c = ceil(d);
+			lo.push_back(f);
+			hi.push_back(c);
+
+			set.push_back(f);
+			set.push_back(c);
+		}
+
+		unique(set.begin(), set.end());
+
+		vector<double> qs;
+		map<int, int> careEle;
+
+		// x <- sort(x, partial = unique(c(lo, hi)))
+		for (auto i : set) {
+
+			nth_element(v.begin(), v.begin() + i - 1 , v.end());
+			careEle[i] = v.at(i - 1);
+		}
+
+		// qs <- x[lo]
+		for (auto i : lo) {
+			qs.push_back(careEle[i]);
+		}
+
+		vector<int> diffIdx;
+
+		for (size_t idx = 0; idx < index.size(); idx++) {
+
+			double diff = index.at(idx) - double(lo.at(idx));
+
+			if (diff > 0) {
+
+				// qs[i] <- (1 - h) * qs[i] + h * x[hi[i]]
+				qs.at(idx) = 
+				(1 - diff) * qs.at(idx) 
+				+ diff * careEle[hi.at(idx)];
+			}
+		}
+
+		double IQR = qs.at(1) - qs.at(0);
+
+		double lowest = qs.at(0) - 1.5 * IQR;
+		double highest = qs.at(1) + 1.5 * IQR;
+
+		// min and max
+		nth_element(v.begin(), v.begin(), v.end());
+		double lowestAbs = v.front();
+
+		nth_element(v.begin(), v.end() - 1, v.end());
+		double highestAbs = v.back();
+
+		if(lowest < lowestAbs) {
+			lowest = lowestAbs;
+		}
+
+		if(highest > highestAbs) {
+			highest = highestAbs;
+		}
+
+		// q1 and q3
+		av.q1 = qs.at(0);
+		av.q3 = qs.at(1);
+
+		// lowest and highest
+		av.lowest = lowest;
+		av.highest = highest;
+	}
+
 	public:
 
 	// Constructor
@@ -510,10 +607,11 @@ class QualityCheck {
 
 	}
 
-	vector<int> getQualVec() {
+	vector<int> getQualVec(int i) {
 		
-		cout << "key: " << perPosAggVal.begin()->first << endl;
-		return perPosAggVal.begin()->second.qualVals;
+		auto iter = next(perPosAggVal.begin(),i);
+		cout << "key: " << iter->first << endl;
+		return iter->second.qualVals;
 	}
 
 	void printMetrics() {
@@ -683,12 +781,43 @@ class QualityCheck {
 
 		for(auto &av : perPosAggVal) {
 
+			// key
+			av.second.key = av.first;
 			// calculate median
 			calcMedian(av.second);
 			// calculate mean
 			calcMean(av.second);
+			// calculate lowest, highest, q1 and q3
+			calcQuartile(av.second);
+		}
+	}
+
+	void genFile_position_quality_distribution() {
+
+		ofstream ofile;
+		ofile.open ("../data/output/position_quality_distribution.txt");
+
+		ofile 	<< "Xlabels\t" 
+			<< "Mean\t"
+			<< "Median\t"
+			<< "Lower Quartile\t"
+			<< "Upper Quartile\t"
+			<< "lowest\t"
+			<< "highest"
+			<< endl;
+
+		for (auto av: perPosAggVal) {
+
+			ofile 	<< av.second.key +1   << "\t"
+				<< av.second.mean     << "\t"
+				<< av.second.median   << "\t"
+				<< av.second.q1       << "\t"
+				<< av.second.q3       << "\t"
+				<< av.second.lowest   << "\t"
+				<< av.second.highest  
+				<< endl;
 		}
 
-
+		ofile.close();
 	}
 };

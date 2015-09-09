@@ -1,4 +1,5 @@
 #include "log.h"
+#include "QualityCheck.h"
 
 // for find_if
 struct MatchPathSeparator
@@ -179,6 +180,8 @@ private:
 
 	gzFile gf1;
 
+	QualityCheck qc;
+
 	vector<string> lines1;
 
 	string wpath;
@@ -235,8 +238,14 @@ private:
 			// add end of line
 			s1.assign(buf1);
 
+			if (i == 1) {
+				qc.parseReadsLine(s1);
+			}
+
 			// 4th line special
 			if (i == 3) {
+				qc.parseQualLine(s1);
+
 				s1.push_back(eol);
 			}
 			else {

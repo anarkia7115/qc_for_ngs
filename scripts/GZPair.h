@@ -1,5 +1,4 @@
 #include "GZ.h"
-#include "QualityCheck.h"
 
 class GZPair 
 {
@@ -256,11 +255,13 @@ private:
 
 			if (i == 1) {
 				qc.parseReadsLine(s1);
+				qc.parseReadsLine(s2);
 			}
 
 			// 4th line special
 			if (i == 3) {
 				qc.parseQualLine(s1);
+				qc.parseQualLine(s2);
 
 				s1.push_back(sep2);
 				s2.push_back(eol);

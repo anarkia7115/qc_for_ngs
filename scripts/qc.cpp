@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iterator>
 #include "GZPair.h"
 
 string call_id;
@@ -14,6 +13,12 @@ int row_num = 0;
 bool is_compress;
 
 pair<double, double> calcQuantile(vector<int> v);
+
+
+struct myclass {
+	  bool operator()(int i,int j) { return (i<j);}
+} myobject;
+
 
 int main(int argc, char** argv) {
 
@@ -34,11 +39,17 @@ int main(int argc, char** argv) {
 
 	QualityCheck qc = gp.returnQc();
 
-	qc.printMetrics();
+	//qc.printMetrics();
 
 	qc.sumUp();
+
 	qc.genFile_position_quality_distribution();
+	qc.genFile_position_base_composition();
+	qc.genFile_qc_bqd_data();
+	qc.genFile_qc_rqd_data();
+
 
 	return 0;
 }
+
 

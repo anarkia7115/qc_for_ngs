@@ -7,6 +7,8 @@ class QualityCheck {
 	long rawBases 	= 0;
 	long rawGcBases	= 0;
 
+	string name = "default";
+
 	long effectiveReads = 0;
 	long effectiveBases = 0;
 
@@ -34,7 +36,7 @@ class QualityCheck {
 	map<char, vector<long>>	perPosReadsCounts;
 	map<char, vector<bool>>	tmp_perPosReadsCounts;
 
-	map<int, long>	perGcReadsCounts;
+	map<int, long, less<int>>	perGcReadsCounts;
 	map<int, long>	perNsReadsCounts;
 	map<int, long>	perBaseReadsCounts;
 	map<int, long>	perQualBasesCounts;
@@ -45,8 +47,8 @@ class QualityCheck {
 	vector<long> perPosQualCounts;
 	vector<long> tmp_perPosQualCounts;
 
-	map<int, long> perQualCounts;
-	map<int, long> perQualReadsCounts;
+	map<int, long, std::less<int>> perQualCounts;
+	map<int, long, std::less<int>> perQualReadsCounts;
 
 	int lineMeanQual 	= 0;
 	bool isQualOk		= false;
@@ -76,6 +78,13 @@ class QualityCheck {
 	int curPos = 0;
 
 	map<int, AggVal> perPosAggVal;
+
+	//map<char, map<int, long> > positionBaseComposition;
+	//map<pair<char, int>, double> positionBaseComposition;
+	map<int, map<char, double>> positionBaseComposition;
+	map<int, int,  less<int>> qc_bqd_data;
+	map<int, long, less<int>> qc_rqd_data;
+	map<int, long, less<int>> qc_gcd_data;
 	
 
 	void addTmpPosReads(char targetKey) {
@@ -199,10 +208,14 @@ class QualityCheck {
 				!= perQualReadsCounts.end()) {
 		
 			perQualReadsCounts[lineMeanQual] ++;
+			//cout << lineMeanQual << ": " 
+			//<< perQualReadsCounts[lineMeanQual] << endl;
 		}
 		else {
 
 			perQualReadsCounts[lineMeanQual] = 1;
+			//cout << lineMeanQual << ": " 
+			//<< perQualReadsCounts[lineMeanQual] << endl;
 		}
 	}
 
@@ -790,14 +803,28 @@ class QualityCheck {
 			// calculate lowest, highest, q1 and q3
 			calcQuartile(av.second);
 		}
+
+		genData_position_base_composition();
+		genData_qc_bqd_data();
+		genData_qc_rqd_data();
+		genData_qc_gcd_data();
 	}
 
 	void genFile_position_quality_distribution() {
 
 		ofstream ofile;
-		ofile.open ("../data/output/position_quality_distribution.txt");
+		ofile.open ("../data/output/qc_pqd_data-" + name + ".txt");
 
-		ofile 	<< "Xlabels\t" 
+		ofile	<< "graph_title" 	<< "\t" << "quality scores across all bases"
+			<< endl
+			<< "minY" 		<< "\t" << 0
+			<< endl
+			<< "maxY" 		<< "\t" << 41
+			<< endl
+			<< "labelX" 		<< "\t" << "position in read (bp)" 
+			<< "\n"
+			<< endl
+			<< "Xlabels\t" 
 			<< "Mean\t"
 			<< "Median\t"
 			<< "Lower Quartile\t"
@@ -820,4 +847,249 @@ class QualityCheck {
 
 		ofile.close();
 	}
+
+	map<int, map<char, double>> getPositionBaseComposition() {
+
+		return positionBaseComposition;
+	}
+
+	map<int, long, std::less<int>> getPerQualCounts() {
+
+		return perQualCounts;
+	}
+
+	void genData_position_base_composition() {
+
+		//map<char, vector<long>>	perPosReadsCounts;
+		map<char, map<int, long>> v1;
+		//map<pair<char, int>, double> positionBaseComposition
+		//map<int, map<char, double>> positionBaseComposition
+
+		char gene;
+		int  key;
+		vector<long> v;
+
+		int sen = 0;
+
+		for (auto g : perPosReadsCounts) {
+
+			gene = g.first;
+			v   = g.second;
+
+			for (int i = 0; i < 9; i++) {
+
+				v1[gene].insert(
+						make_pair(i, v[i]));
+			}
+
+			for (int i = 9; i < 149; i++) {
+
+				if(sen == 0) {
+					key = i;
+					sen++;
+					v1[gene].insert(
+						make_pair(key, 0));
+				}
+				else if(sen == 4){
+					sen = 0;
+				}
+				else {
+					sen++;
+				}
+
+				v1[gene][key] 
+					+= v[i];
+			}
+
+			v1[gene].insert(
+					make_pair(149, v[149]));
+
+		}
+
+		map<int, map<int, long>> v2;
+		for (auto m : v1) {
+
+			gene = m.first;
+
+			for (auto l : m.second) {
+
+				key = l.first;
+
+				v2[key][gene] = l.second;
+			}
+		}
+
+		long sum = 0;
+
+		for (auto m : v2) {
+
+			sum = 0;
+			key = m.first;
+
+			for (auto l : m.second) {
+
+				sum += l.second;
+			}
+
+			for (auto l : m.second) {
+				gene = l.first;
+
+				positionBaseComposition[key][gene] 
+					= (double) l.second
+					/ (double) sum
+					* 100;
+			}
+		}
+	}
+
+	void genFile_position_base_composition() {
+
+		ofstream ofile;
+		ofile.open ("../data/output/qc_pbc_data-" + name + ".txt");
+
+		ofile 	<< "graph_title\tbase percentage composition along reads"
+			<< endl
+			<< "allX\t5"
+			<< endl
+			<< "allY\t38"
+			<< endl
+			<< "labelX\tposition along reads"
+			<< endl
+			<< "labelY\tpercentage"
+			<< endl
+			<< "legend\tACGTN"
+			<< "\n"
+			<< endl
+			<< "Base\t"
+			<< "G\t"
+			<< "A\t"
+			<< "T\t"
+			<< "C\t"
+			<< "N"
+			<< endl;
+
+		auto g = positionBaseComposition;
+
+		map<int, map<char, double>>::iterator it;
+
+		for (int i = 0; i < 150; i++) {
+
+			it = g.find(i);
+			if(it != g.end()) {
+
+				ofile	<< i +1 << "\t"
+					<< it->second['G'] << "\t"
+					<< it->second['A'] << "\t"
+					<< it->second['T'] << "\t"
+					<< it->second['C'] << "\t"
+					<< it->second['N'] << "\t"
+					<< endl;
+			}
+		}
+
+	}
+
+	void genData_qc_bqd_data() {
+
+		long sum = 0;
+		long left = 0;
+		//map<int, long> perQualCounts;
+		//map<int, long> perQualReadsCounts;
+		vector<int> quals;
+		//map<int, int> qc_bqd_data;
+
+		for(auto l : perQualCounts) {
+
+			sum += l.second;
+		}
+
+		left = sum;
+
+		for(auto l : perQualCounts) {
+
+			qc_bqd_data[l.first] = (double(left) / double(sum)) * 100;
+
+			//cout << qc_bqd_data[l.first] << endl;
+			//cout << l.first << " fraq: " << double(left)/double(sum) << endl;
+			left -= l.second;
+		}
+	}
+
+	void genFile_qc_bqd_data() {
+
+		//map<int, int> qc_bqd_data;
+
+		ofstream ofile;
+		ofile.open ("../data/output/qc_bqd_data-" + name + ".txt");
+
+		ofile 	<< "graph_title\taccumulated base quality over all bases\n"
+			<< "allX\t" << qc_bqd_data.size() << "\n"
+			<< "allY\t1\n"
+			<< "labelX\tbase quality\n"
+			<< "labelY\tpercentage\n"
+			<< endl
+
+			<< "Quality\t"
+			<< "Count"
+			<< endl;
+
+		for (auto i : qc_bqd_data) {
+
+			ofile 	<< i.first << "\t" << i.second << endl;
+		}
+	}
+
+	void genData_qc_rqd_data() {
+		qc_rqd_data = perQualReadsCounts;
+	}
+
+	void genFile_qc_rqd_data() {
+		
+		ofstream ofile;
+		ofile.open ("../data/output/qc_rqd_data-" + name + ".txt");
+
+		ofile 	<< "graph_title\tquality score distribution over all sequences\n"
+			<< "allX\t" << qc_rqd_data.size() << "\n"
+			<< "allY\t1\n"
+			<< "labelX\tbase quality\n"
+			<< "labelY\tpercentage\n"
+			<< endl
+
+			<< "Quality\t"
+			<< "Count"
+			<< endl;
+
+		for (auto i : qc_rqd_data) {
+
+			ofile 	<< i.first << "\t" << i.second << endl;
+		}
+	}
+
+	void genData_qc_gcd_data() {
+
+		qc_gcd_data = perQualReadsCounts;
+	}
+
+	void genFile_qc_gcd_data() {
+		
+		ofstream ofile;
+		ofile.open ("../data/output/qc_rqd_data-" + name + ".txt");
+
+		ofile 	<< "graph_title\tGC distribution over all sequences\n"
+			<< "allX\t" << qc_gcd_data.size() << "\n"
+			<< "allY\t1\n"
+			<< "labelX\tmean GC content (%)\n"
+			<< "labelY\tGC count per read\n"
+			<< endl
+
+			<< "Quality\t"
+			<< "Count"
+			<< endl;
+
+		for (auto i : qc_rqd_data) {
+
+			ofile 	<< i.first << "\t" << i.second << endl;
+		}
+	}
+
 };

@@ -1073,7 +1073,7 @@ class QualityCheck {
 	void genFile_qc_gcd_data() {
 		
 		ofstream ofile;
-		ofile.open ("../data/output/qc_rqd_data-" + name + ".txt");
+		ofile.open ("../data/output/qc_gcd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tGC distribution over all sequences\n"
 			<< "allX\t" << qc_gcd_data.size() << "\n"
@@ -1082,11 +1082,11 @@ class QualityCheck {
 			<< "labelY\tGC count per read\n"
 			<< endl
 
-			<< "Quality\t"
+			<< "GC Counts\t"
 			<< "Count"
 			<< endl;
 
-		for (auto i : qc_rqd_data) {
+		for (auto i : qc_gcd_data) {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}

@@ -1,12 +1,16 @@
 #!/bin/bash
 
-localInput="../data"
-gz1fn="WGC_20m_n1.fq.gz"
-gz2fn="WGC_20m_n2.fq.gz"
+f1="../data/WGC_100t_n1.gz"
+f2="../data/WGC_100t_n2.gz"
 localOutput="../data/output"
 
 ./qc \
-  --gz1 $localInput/$gz1fn --gz2 $localInput/$gz2fn \
+  --gz1 $f1 --gz2 $f2 \
   --output $localOutput \
   --row 1000000 
 
+
+echo "./qc \
+  --gz1 $f1 --gz2 $f2 \
+  --output $localOutput \
+  --row 1000000" 

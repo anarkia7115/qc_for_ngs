@@ -22,6 +22,7 @@ class QualityCheck {
 	double effectiveRate 	= 0;
 
 	long lineQualSum 	= 0;
+	size_t genSen = 0;
 
 	long q30Bases	= 0;
 	long q20Bases	= 0;
@@ -103,7 +104,6 @@ class QualityCheck {
 				tmp_perPosReadsCounts[key].push_back(true);
 			}
 			else{
-
 				tmp_perPosReadsCounts[key].push_back(false);
 			}
 		}
@@ -120,13 +120,10 @@ class QualityCheck {
 
 			key = k;
 
-			// can deleted
-			//int lenTot = perPosReadsCounts->size();
-			//int lenTmp = tmp_perPosReadsCounts->size();
-
 			auto totIter = perPosReadsCounts[key].begin();
 			auto tmpIter = tmp_perPosReadsCounts[key].begin();
 
+			// 50% time on the for loop
 			for (   ; totIter != perPosReadsCounts[key].end() 
 				&& tmpIter != tmp_perPosReadsCounts[key].end()
 				; totIter++) {
@@ -148,7 +145,6 @@ class QualityCheck {
 					perPosReadsCounts[key].push_back(0);
 				}
 			}
-
 		}
 
 		//cout << "tmp size: " << tmp_perPosReadsCounts.size() << endl;
@@ -651,33 +647,78 @@ class QualityCheck {
 	void printQualDistribution() {
 	}
 
-	void parseGene(char gene) {
+	bool parseGene(char gene) {
 		lineBases++;
+		size_t s = perPosReadsCounts[gene].size();
 
 		switch(gene){
+
+			//cerr << "size: " << s << endl;
+
 			case 'G':
 				lineGcBases++;
 				// count++
-				addTmpPosReads('G');
+				if(s < genSen + 1) {
+					//cerr << genSen<< "size not full" << endl;
+					for(size_t i = 0; i < genSen - s + 1; i++) {
+						perPosReadsCounts['G'].push_back(0);
+					}
+				}
+				perPosReadsCounts['G'].at(genSen)++; 
+				//addTmpPosReads('G');
 				break;
 			case 'C':
+				if(s < genSen + 1) {
+					//cerr << genSen<< "size not full" << endl;
+					for(size_t i = 0; i < genSen - s + 1; i++) {
+						perPosReadsCounts['C'].push_back(0);
+					}
+				}
 				lineGcBases++;
-				addTmpPosReads('C');
+				perPosReadsCounts['C'].at(genSen)++; 
+				//addTmpPosReads('C');
 				break;
 			case 'A':
-				addTmpPosReads('A');
+				if(s < genSen + 1) {
+					//cerr << genSen<< "size not full" << endl;
+					for(size_t i = 0; i < genSen - s + 1; i++) {
+						perPosReadsCounts['A'].push_back(0);
+					}
+				}
+				perPosReadsCounts['A'].at(genSen)++; 
+				//addTmpPosReads('A');
 				break;
 			case 'T':
-				addTmpPosReads('T');
+				if(s < genSen + 1) {
+					//cerr << genSen<< "size not full" << endl;
+					for(size_t i = 0; i < genSen - s + 1; i++) {
+						perPosReadsCounts['T'].push_back(0);
+					}
+				}
+				perPosReadsCounts['T'].at(genSen)++; 
+				//addTmpPosReads('T');
 				break;
 			case 'N':
+				if(s < genSen + 1) {
+					//cerr << genSen<< "size not full" << endl;
+					for(size_t i = 0; i < genSen - s + 1; i++) {
+						perPosReadsCounts['N'].push_back(1);
+					}
+				}
 				lineNBases++;
-				addTmpPosReads('N');
+				perPosReadsCounts['N'].at(genSen)++; 
+				//addTmpPosReads('N');
 				break;
 			default:
-				cerr << "Warning:\n\t" << "\tunknown base?" << endl;
+				cerr 	<< "Warning:\n\t" 
+					<< gene
+					<< "\tunknown base?" << endl;
+				return false;
 				break;	
 		}
+
+		genSen++;
+		return true;
 	}
 
 	void parseQual(char qualCh) {
@@ -694,29 +735,29 @@ class QualityCheck {
 
 		lineQualSum += qual;
 
-		if(qual >= 30) {
-			q30Bases++;
-			q20Bases++;
-			q10Bases++;
-			q4Bases++;
-		}
-		else if(qual >= 20) {
-			q20Bases++;
-			q10Bases++;
-			q4Bases++;
-		}
-		else if(qual >= 10) {
-			q10Bases++;
-			q4Bases++;
-			lineLowQualBases++;
-		}
-		else if(qual >= 4) {
-			q4Bases++;
-			lineLowQualBases++;
-		}
-		else {
-			lineLowQualBases++;
-		}
+		//if(qual >= 30) {
+		//	q30Bases++;
+		//	q20Bases++;
+		//	q10Bases++;
+		//	q4Bases++;
+		//}
+		//else if(qual >= 20) {
+		//	q20Bases++;
+		//	q10Bases++;
+		//	q4Bases++;
+		//}
+		//else if(qual >= 10) {
+		//	q10Bases++;
+		//	q4Bases++;
+		//	lineLowQualBases++;
+		//}
+		//else if(qual >= 4) {
+		//	q4Bases++;
+		//	lineLowQualBases++;
+		//}
+		//else {
+		//	lineLowQualBases++;
+		//}
 
 		curPos++;
 	}
@@ -727,6 +768,7 @@ class QualityCheck {
 		lineGcBases = 0;
 		lineNBases  = 0;
 		lineBases = 0;
+		genSen = 0;
 
 		// first iter
 		auto siter = line.begin();
@@ -737,11 +779,16 @@ class QualityCheck {
 
 			// shift pos
 			//cout << "current gene before parse: " << *siter << endl;
-			parseGene(*siter);
+			if(!parseGene(*siter)) {
+				cout << line << endl;
+				exit(-1);
+			}
 		}
 
 		// flush tmp vector
-		flushTmpReads();
+		// 60% of the time
+		//flushTmpReads();
+		//tmp_perPosReadsCounts.clear();
 
 		// add line metrics to total
 		rawReads++;

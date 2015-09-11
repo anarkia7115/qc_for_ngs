@@ -248,6 +248,9 @@ private:
 			// read
 			is_get = gzgets(gf1, buf1, CHUNK);
 			gzgets(gf2, buf2, CHUNK);
+			if (!is_get) {
+				break;
+			}
 
 			chomp(buf1);
 			chomp(buf2);
@@ -263,8 +266,8 @@ private:
 
 			// 4th line special
 			if (i == 3) {
-				qc.parseQualLine(s1);
-				qc.parseQualLine(s2);
+				//qc.parseQualLine(s1);
+				//qc.parseQualLine(s2);
 
 				s1.push_back(sep2);
 				s2.push_back(eol);

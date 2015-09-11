@@ -66,10 +66,13 @@ public:
 	}
 
 	// test
-	void testFunc() 
+	void testFunc(int i, bool isCompress) 
 	{
-		for (int i = 0; i < 100; i++){
-			this->readLines();
+		if(isCompress) {
+		        splitFiles(i);
+		}
+		else {
+		        splitFilesNoCompress(i);
 		}
 	}
 

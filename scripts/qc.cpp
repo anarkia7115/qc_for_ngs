@@ -29,8 +29,8 @@ int main(int argc, char** argv) {
 	//	colNum = atoi(argv[1]);
 	//}
 
-	string p1 = "../data/sample_n1.gz";
-	string p2 = "../data/sample_n2.gz";
+	string p1 = "../data/WGC_20m_n1.fq.gz";
+	string p2 = "../data/WGC_20m_n2.fq.gz";
 	string outputPath = "../data/output";
 	GZPair gp(p1, p2,outputPath);
 

@@ -48,7 +48,7 @@ class QualityCheck {
 	vector<long> perPosQualCounts;
 	vector<long> tmp_perPosQualCounts;
 
-	map<int, long, std::less<int>> perQualCounts;
+	vector<long> perQualCounts;
 	map<int, long, std::less<int>> perQualReadsCounts;
 
 	int lineMeanQual 	= 0;
@@ -186,6 +186,7 @@ class QualityCheck {
 
 	void addPerQualCounts(int qual) {
 
+/*
 		if(perQualCounts.find(qual) != perQualCounts.end()) {
 
 			// add to orig record
@@ -196,6 +197,8 @@ class QualityCheck {
 			// assign to the record directly
 			perQualCounts[qual] = 1;
 		}
+*/
+		perQualCounts[qual]++;
 		
 	}
 
@@ -614,7 +617,7 @@ class QualityCheck {
 	public:
 
 	// Constructor
-	QualityCheck() {
+	QualityCheck() : perQualCounts(100, 0) {
 
 	}
 
@@ -902,7 +905,7 @@ class QualityCheck {
 		return positionBaseComposition;
 	}
 
-	map<int, long, std::less<int>> getPerQualCounts() {
+	vector<long> getPerQualCounts() {
 
 		return perQualCounts;
 	}
@@ -1049,18 +1052,20 @@ class QualityCheck {
 
 		for(auto l : perQualCounts) {
 
-			sum += l.second;
+			sum += l;
 		}
 
 		left = sum;
 
+		int i = 0;
 		for(auto l : perQualCounts) {
 
-			qc_bqd_data[l.first] = (double(left) / double(sum)) * 100;
+			qc_bqd_data[i] = (double(left) / double(sum)) * 100;
 
 			//cout << qc_bqd_data[l.first] << endl;
 			//cout << l.first << " fraq: " << double(left)/double(sum) << endl;
-			left -= l.second;
+			left -= l;
+			i++;
 		}
 	}
 

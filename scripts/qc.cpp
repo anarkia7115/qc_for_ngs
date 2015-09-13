@@ -37,17 +37,17 @@ int main(int argc, char** argv) {
 	gp.testFunc();
 	//vector<string> lines1 = gp.getLines1();
 
-	QualityCheck qc = gp.returnQc();
+	//QualityCheck qc = gp.returnQc();
 
 	//qc.printMetrics();
 
-	qc.sumUp();
+	//qc.sumUp();
 
-	qc.genFile_position_quality_distribution();
-	qc.genFile_position_base_composition();
-	qc.genFile_qc_bqd_data();
-	qc.genFile_qc_rqd_data();
-	qc.genFile_qc_gcd_data();
+	//qc.genFile_position_quality_distribution();
+	//qc.genFile_position_base_composition();
+	//qc.genFile_qc_bqd_data();
+	//qc.genFile_qc_rqd_data();
+	//qc.genFile_qc_gcd_data();
 
 
 	return 0;

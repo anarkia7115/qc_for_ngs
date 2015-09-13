@@ -110,6 +110,7 @@ class QualityCheck {
 
 	}
 
+/*
 	void flushTmpReads() {
 		//int lenTot = 0;
 		//int lenTmp = 0;
@@ -150,6 +151,7 @@ class QualityCheck {
 		//cout << "tmp size: " << tmp_perPosReadsCounts.size() << endl;
 		tmp_perPosReadsCounts.clear();
 	}
+*/
 
 	void addTmpPosQual(int qualVal) {
 

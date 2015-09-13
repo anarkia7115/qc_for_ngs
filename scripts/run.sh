@@ -1,7 +1,7 @@
 #!/bin/bash
 
-f1="../data/WGC_100t_n1.gz"
-f2="../data/WGC_100t_n2.gz"
+f1="../data/sample100t1.gz"
+f2="../data/sample100t2.gz"
 localOutput="../data/output"
 
 ./qc \

@@ -266,8 +266,8 @@ private:
 
 			// 4th line special
 			if (i == 3) {
-				//qc.parseQualLine(s1);
-				//qc.parseQualLine(s2);
+				qc.parseQualLine(s1);
+				qc.parseQualLine(s2);
 
 				s1.push_back(sep2);
 				s2.push_back(eol);

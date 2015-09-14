@@ -78,7 +78,7 @@ class QualityCheck {
 	} ;
 	int curPos = 0;
 
-	map<int, AggVal> perPosAggVal;
+	vector<AggVal> perPosAggVal;
 
 	//map<char, map<int, long> > positionBaseComposition;
 	//map<pair<char, int>, double> positionBaseComposition;
@@ -617,15 +617,8 @@ class QualityCheck {
 	public:
 
 	// Constructor
-	QualityCheck() : perQualCounts(100, 0) {
+	QualityCheck() : perQualCounts(100, 0), perPosAggVal(200){
 
-	}
-
-	vector<int> getQualVec(int i) {
-		
-		auto iter = next(perPosAggVal.begin(),i);
-		cout << "key: " << iter->first << endl;
-		return iter->second.qualVals;
 	}
 
 	void printMetrics() {
@@ -733,6 +726,7 @@ class QualityCheck {
 		int qual = qualCh - 33;
 
 		// lowest and highest
+		// gen big data
 		addPerPosAggVal(qual);
 
 		addTmpPosQual(qual);
@@ -844,16 +838,18 @@ class QualityCheck {
 
 	void sumUp() {
 
+		int i = 0;
 		for(auto &av : perPosAggVal) {
 
 			// key
-			av.second.key = av.first;
+			av.key = i;
 			// calculate median
-			calcMedian(av.second);
+			calcMedian(av);
 			// calculate mean
-			calcMean(av.second);
+			calcMean(av);
 			// calculate lowest, highest, q1 and q3
-			calcQuartile(av.second);
+			calcQuartile(av);
+			i++;
 		}
 
 		genData_position_base_composition();
@@ -887,13 +883,13 @@ class QualityCheck {
 
 		for (auto av: perPosAggVal) {
 
-			ofile 	<< av.second.key +1   << "\t"
-				<< av.second.mean     << "\t"
-				<< av.second.median   << "\t"
-				<< av.second.q1       << "\t"
-				<< av.second.q3       << "\t"
-				<< av.second.lowest   << "\t"
-				<< av.second.highest  
+			ofile 	<< av.key +1   << "\t"
+				<< av.mean     << "\t"
+				<< av.median   << "\t"
+				<< av.q1       << "\t"
+				<< av.q3       << "\t"
+				<< av.lowest   << "\t"
+				<< av.highest  
 				<< endl;
 		}
 

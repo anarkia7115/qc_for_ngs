@@ -1,6 +1,13 @@
+#include <map>
+#include <algorithm>
+
+using namespace std;
 class QualityCheck {
 
 	private:
+
+	// parameters
+	string outputFolderPath;
 
 	double rawLen 	= 0;
 	long rawReads 	= 0;
@@ -617,8 +624,9 @@ class QualityCheck {
 	public:
 
 	// Constructor
-	QualityCheck() : perQualCounts(100, 0) {
+	QualityCheck(string op) : perQualCounts(100, 0) {
 
+		this->outputFolderPath = op;
 	}
 
 	vector<int> getQualVec(int i) {
@@ -844,6 +852,23 @@ class QualityCheck {
 
 	void sumUp() {
 
+		genData_qc_pqd();
+		genData_qc_pbc();
+		genData_qc_bqd();
+		genData_qc_rqd();
+		genData_qc_gcd();
+	}
+
+	void genFiles() {
+		genFile_qc_pqd();
+		genFile_qc_pbc();
+		genFile_qc_bqd();
+		genFile_qc_rqd();
+		genFile_qc_gcd();
+	}
+
+	void genData_qc_pqd() {
+
 		for(auto &av : perPosAggVal) {
 
 			// key
@@ -855,17 +880,12 @@ class QualityCheck {
 			// calculate lowest, highest, q1 and q3
 			calcQuartile(av.second);
 		}
-
-		genData_position_base_composition();
-		genData_qc_bqd_data();
-		genData_qc_rqd_data();
-		genData_qc_gcd_data();
 	}
 
-	void genFile_position_quality_distribution() {
+	void genFile_qc_pqd() {
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_pqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_pqd_data-" + name + ".txt");
 
 		ofile	<< "graph_title" 	<< "\t" << "quality scores across all bases"
 			<< endl
@@ -910,7 +930,7 @@ class QualityCheck {
 		return perQualCounts;
 	}
 
-	void genData_position_base_composition() {
+	void genData_qc_pbc() {
 
 		//map<char, vector<long>>	perPosReadsCounts;
 		map<char, map<int, long>> v1;
@@ -994,10 +1014,10 @@ class QualityCheck {
 		}
 	}
 
-	void genFile_position_base_composition() {
+	void genFile_qc_pbc() {
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_pbc_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_pbc_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tbase percentage composition along reads"
 			<< endl
@@ -1041,7 +1061,7 @@ class QualityCheck {
 
 	}
 
-	void genData_qc_bqd_data() {
+	void genData_qc_bqd() {
 
 		long sum = 0;
 		long left = 0;
@@ -1069,12 +1089,12 @@ class QualityCheck {
 		}
 	}
 
-	void genFile_qc_bqd_data() {
+	void genFile_qc_bqd() {
 
 		//map<int, int> qc_bqd_data;
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_bqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_bqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\taccumulated base quality over all bases\n"
 			<< "allX\t" << qc_bqd_data.size() << "\n"
@@ -1093,14 +1113,14 @@ class QualityCheck {
 		}
 	}
 
-	void genData_qc_rqd_data() {
+	void genData_qc_rqd() {
 		qc_rqd_data = perQualReadsCounts;
 	}
 
-	void genFile_qc_rqd_data() {
+	void genFile_qc_rqd() {
 		
 		ofstream ofile;
-		ofile.open ("../data/output/qc_rqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_rqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tquality score distribution over all sequences\n"
 			<< "allX\t" << qc_rqd_data.size() << "\n"
@@ -1119,15 +1139,15 @@ class QualityCheck {
 		}
 	}
 
-	void genData_qc_gcd_data() {
+	void genData_qc_gcd() {
 
 		qc_gcd_data = perQualReadsCounts;
 	}
 
-	void genFile_qc_gcd_data() {
+	void genFile_qc_gcd() {
 		
 		ofstream ofile;
-		ofile.open ("../data/output/qc_gcd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_gcd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tGC distribution over all sequences\n"
 			<< "allX\t" << qc_gcd_data.size() << "\n"

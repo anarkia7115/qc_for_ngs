@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
 	//qc.genFile_qc_bqd_data();
 	//qc.genFile_qc_rqd_data();
 	//qc.genFile_qc_gcd_data();
+	//
+	//
 
 
 	return 0;

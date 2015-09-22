@@ -75,6 +75,8 @@ int main(int argc, char** argv) {
 
 	qc.genFiles();
 
+	qc.printMatrix();
+
 	//qc.listQualVec();
 
 	

@@ -976,6 +976,27 @@ class QualityCheck {
 		ofile.close();
 	}
 
+	void printMatrix() {
+
+		ofstream ofile;
+		ofile.open (outputFolderPath + "/matrix-" + name + ".txt");
+
+
+		for (auto a : perPosAggVal) {
+
+			ofile << a.first << ":\t";
+			auto qv = a.second.qualVals;
+
+			for (auto c : qv) {
+
+				ofile << c << "\t";
+			}
+
+			ofile << endl;
+		}
+		ofile.close();
+	}
+
 	map<int, map<char, double>> getPositionBaseComposition() {
 
 		return positionBaseComposition;
@@ -1115,6 +1136,7 @@ class QualityCheck {
 			}
 		}
 
+		ofile.close();
 	}
 
 	void genData_qc_bqd() {
@@ -1167,6 +1189,7 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
 	void genData_qc_rqd() {
@@ -1193,6 +1216,7 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
 	void genData_qc_gcd() {
@@ -1220,6 +1244,7 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
 };

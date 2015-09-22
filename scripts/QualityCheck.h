@@ -1,6 +1,13 @@
+#include <map>
+#include <algorithm>
+
+using namespace std;
 class QualityCheck {
 
 	private:
+
+	// parameters
+	string outputFolderPath;
 
 	double rawLen 	= 0;
 	long rawReads 	= 0;
@@ -67,13 +74,14 @@ class QualityCheck {
 
 		double median = 0;
 
-		double lowest = 9999;
-		double highest = 0;
+		int lowest = 9999;
+		int highest = 0;
 
-		int q1 = 0;
-		int q3 = 0;
+		double q1 = 0;
+		double q3 = 0;
 
-		vector<int> qualVals;
+		vector<long> qualVals;
+		AggVal() :qualVals(50,0){}
 
 	} ;
 	int curPos = 0;
@@ -186,20 +194,7 @@ class QualityCheck {
 
 	void addPerQualCounts(int qual) {
 
-/*
-		if(perQualCounts.find(qual) != perQualCounts.end()) {
-
-			// add to orig record
-			perQualCounts[qual]++;
-		}
-		else {
-
-			// assign to the record directly
-			perQualCounts[qual] = 1;
-		}
-*/
 		perQualCounts[qual]++;
-		
 	}
 
 	void addPerQualReadsCount() {
@@ -207,7 +202,7 @@ class QualityCheck {
 		// if record exists
 		if(perQualReadsCounts.find(lineMeanQual) 
 				!= perQualReadsCounts.end()) {
-		
+
 			perQualReadsCounts[lineMeanQual] ++;
 			//cout << lineMeanQual << ": " 
 			//<< perQualReadsCounts[lineMeanQual] << endl;
@@ -262,7 +257,33 @@ class QualityCheck {
 
 	void addPerPosAggVal(int qual) {
 		// push value to the right position
-		switch(curPos) {
+		int intervalNum = posToInterval(curPos);
+
+		AggVal &curAggVal = perPosAggVal[intervalNum];
+
+		curAggVal.qualVals[qual]++;
+
+		// count++
+		curAggVal.count++;
+
+		// max and min
+		int &l = curAggVal.lowest;
+		int &h = curAggVal.highest;
+
+		if (qual < l) {
+
+			l = qual;
+		}
+
+		if (qual > h) {
+
+			h = qual;
+		}
+	}
+
+	int posToInterval(int pos) {
+		// push value to the right position
+		switch(pos) {
 			case 0:
 				//cout << "in case 0: " << endl;
 			case 1:
@@ -274,179 +295,180 @@ class QualityCheck {
 			case 7:
 			case 8:
 			case 149:
-				perPosAggVal[curPos].qualVals.push_back(qual);break;
+				return pos;
 			case 9:
 			case 10:
 			case 11:
 			case 12:
 			case 13:
-				perPosAggVal[9].qualVals.push_back(qual);break;
+				return 9;
 			case 14:
 			case 15:
 			case 16:
 			case 17:
 			case 18:
-				perPosAggVal[14].qualVals.push_back(qual);break;
+				return 14;
 			case 19:
 			case 20:
 			case 21:
 			case 22:
 			case 23:
-				perPosAggVal[19].qualVals.push_back(qual);break;
+				return 19;
 			case 24:
 			case 25:
 			case 26:
 			case 27:
 			case 28:
-				perPosAggVal[24].qualVals.push_back(qual);break;
+				return 24;
 			case 29:
 			case 30:
 			case 31:
 			case 32:
 			case 33:
-				perPosAggVal[29].qualVals.push_back(qual);break;
+				return 29;
 			case 34:
 			case 35:
 			case 36:
 			case 37:
 			case 38:
-				perPosAggVal[34].qualVals.push_back(qual);break;
+				return 34;
 			case 39:
 			case 40:
 			case 41:
 			case 42:
 			case 43:
-				perPosAggVal[39].qualVals.push_back(qual);break;
+				return 39;
 			case 44:
 			case 45:
 			case 46:
 			case 47:
 			case 48:
-				perPosAggVal[44].qualVals.push_back(qual);break;
+				return 44;
 			case 49:
 			case 50:
 			case 51:
 			case 52:
 			case 53:
-				perPosAggVal[49].qualVals.push_back(qual);break;
+				return 49;
 			case 54:
 			case 55:
 			case 56:
 			case 57:
 			case 58:
-				perPosAggVal[54].qualVals.push_back(qual);break;
+				return 54;
 			case 59:
 			case 60:
 			case 61:
 			case 62:
 			case 63:
-				perPosAggVal[59].qualVals.push_back(qual);break;
+				return 59;
 			case 64:
 			case 65:
 			case 66:
 			case 67:
 			case 68:
-				perPosAggVal[64].qualVals.push_back(qual);break;
+				return 64;
 			case 69:
 			case 70:
 			case 71:
 			case 72:
 			case 73:
-				perPosAggVal[69].qualVals.push_back(qual);break;
+				return 69;
 			case 74:
 			case 75:
 			case 76:
 			case 77:
 			case 78:
-				perPosAggVal[74].qualVals.push_back(qual);break;
+				return 74;
 			case 79:
 			case 80:
 			case 81:
 			case 82:
 			case 83:
-				perPosAggVal[79].qualVals.push_back(qual);break;
+				return 79;
 			case 84:
 			case 85:
 			case 86:
 			case 87:
 			case 88:
-				perPosAggVal[84].qualVals.push_back(qual);break;
+				return 84;
 			case 89:
 			case 90:
 			case 91:
 			case 92:
 			case 93:
-				perPosAggVal[89].qualVals.push_back(qual);break;
+				return 89;
 			case 94:
 			case 95:
 			case 96:
 			case 97:
 			case 98:
-				perPosAggVal[94].qualVals.push_back(qual);break;
+				return 94;
 			case 99:
 			case 100:
 			case 101:
 			case 102:
 			case 103:
-				perPosAggVal[99].qualVals.push_back(qual);break;
+				return 99;
 			case 104:
 			case 105:
 			case 106:
 			case 107:
 			case 108:
-				perPosAggVal[104].qualVals.push_back(qual);break;
+				return 104;
 			case 109:
 			case 110:
 			case 111:
 			case 112:
 			case 113:
-				perPosAggVal[109].qualVals.push_back(qual);break;
+				return 109;
 			case 114:
 			case 115:
 			case 116:
 			case 117:
 			case 118:
-				perPosAggVal[114].qualVals.push_back(qual);break;
+				return 114;
 			case 119:
 			case 120:
 			case 121:
 			case 122:
 			case 123:
-				perPosAggVal[119].qualVals.push_back(qual);break;
+				return 119;
 			case 124:
 			case 125:
 			case 126:
 			case 127:
 			case 128:
-				perPosAggVal[124].qualVals.push_back(qual);break;
+				return 124;
 			case 129:
 			case 130:
 			case 131:
 			case 132:
 			case 133:
-				perPosAggVal[129].qualVals.push_back(qual);break;
+				return 129;
 			case 134:
 			case 135:
 			case 136:
 			case 137:
 			case 138:
-				perPosAggVal[134].qualVals.push_back(qual);break;
+				return 134;
 			case 139:
 			case 140:
 			case 141:
 			case 142:
 			case 143:
-				perPosAggVal[139].qualVals.push_back(qual);break;
+				return 139;
 			case 144:
 			case 145:
 			case 146:
 			case 147:
 			case 148:
-				perPosAggVal[144].qualVals.push_back(qual);break;
+				return 144;
 			default:
-				cerr << "" << endl;
+				cerr << "unkonw position!" << endl;
 				exit(-1);
 		}
+
 
 	}
 
@@ -482,27 +504,58 @@ class QualityCheck {
 		}
 	}
 
+	// return qual
+	int getPosVal(vector<long> v, long pos) {
+
+		long sumIdx = 0;
+		int qual = 0;
+		for(auto i : v) {
+
+			sumIdx += i;
+			//cout << "i: " << i << endl;
+			//cout << "sumIdx: " << sumIdx << endl;
+			//cout << "pos: " << pos << endl;
+			if(sumIdx > pos) {
+				//cout << "returned" << endl;
+				//cout << qual << endl;
+
+				return qual;
+			}
+
+			// this qual passed
+			// next quality
+			qual++;
+		}
+
+		cerr << "quality pos exceed!" << endl;
+		exit(-1);
+	}
+
 	void calcMedian(AggVal& av) {
 
-		vector<int> v = av.qualVals;
+		vector<long> v = av.qualVals;
 
 		double median;
-		size_t size = v.size();
+		size_t size = av.count;
 
-		int a = 0, b = 0;
+		double a = 0, b = 0;
 
 		if (size % 2 == 0) {
-			std::nth_element(v.begin()
-					, v.begin() + size / 2 - 1, v.end());
-			a = v[size / 2 - 1];
-			b = v[size / 2];
 
+			//std::nth_element(v.begin()
+			//		, v.begin() + size / 2 - 1, v.end());
+			//a = v[size / 2 - 1];
+			//b = v[size / 2];
+
+			a = getPosVal(v, size / 2 - 1);
+			b = getPosVal(v, size / 2);
 			median = (a + b) / 2;
 		}
 		else {
-			std::nth_element(v.begin()
-					, v.begin() + size / 2, v.end());
-			median = v[size / 2];
+			//std::nth_element(v.begin()
+			//		, v.begin() + size / 2, v.end());
+			//median = v[size / 2];
+			median = getPosVal(v, size / 2);
 		}
 
 		av.median  = median;
@@ -510,23 +563,27 @@ class QualityCheck {
 
 	void calcMean(AggVal& av) {
 
-		vector<int> v = av.qualVals;
+		vector<long> v = av.qualVals;
 
 		long sum = 0;
+		int qual = 0;
 
 		for(auto i : v) {
 
-			sum += i;
+			sum += i * qual;
+
+			// next qual
+			qual++;
 		}
 
-		av.mean = double(sum) / double(v.size());
+		av.mean = double(sum) / double(av.count);
 	}
 
 	void calcQuartile(AggVal& av) {
 
-		vector<int> v = av.qualVals;
+		vector<long> v = av.qualVals;
 
-		int n = v.size();
+		int n = av.count;
 
 		vector<double> probs = {0.25, 0.75};
 
@@ -561,8 +618,9 @@ class QualityCheck {
 		// x <- sort(x, partial = unique(c(lo, hi)))
 		for (auto i : set) {
 
-			nth_element(v.begin(), v.begin() + i - 1 , v.end());
-			careEle[i] = v.at(i - 1);
+			//nth_element(v.begin(), v.begin() + i - 1 , v.end());
+			//careEle[i] = v.at(i - 1);
+			careEle[i] = getPosVal(v, i-1);
 		}
 
 		// qs <- x[lo]
@@ -591,11 +649,13 @@ class QualityCheck {
 		double highest = qs.at(1) + 1.5 * IQR;
 
 		// min and max
-		nth_element(v.begin(), v.begin(), v.end());
-		double lowestAbs = v.front();
+		//nth_element(v.begin(), v.begin(), v.end());
+		//double lowestAbs = v.front();
+		double lowestAbs = av.lowest;
 
-		nth_element(v.begin(), v.end() - 1, v.end());
-		double highestAbs = v.back();
+		//nth_element(v.begin(), v.end() - 1, v.end());
+		//double highestAbs = v.back();
+		double highestAbs = av.highest;
 
 		if(lowest < lowestAbs) {
 			lowest = lowestAbs;
@@ -617,8 +677,20 @@ class QualityCheck {
 	public:
 
 	// Constructor
-	QualityCheck() : perQualCounts(100, 0), perPosAggVal(200){
+	QualityCheck(string op) : perQualCounts(100, 0) {
 
+		this->outputFolderPath = op;
+	}
+
+	void listQualVec() {
+		
+		// map<int, AggVal> perPosAggVal;
+		cout << "a size: " << perPosAggVal.size() << endl;
+		for(auto a : perPosAggVal) {
+			cout << "key: " << a.first << endl;
+			cout << "qual count: " << a.second.count << endl;
+			cout << "vector size: " << a.second.qualVals.size() << endl;
+		}
 	}
 
 	void printMetrics() {
@@ -725,8 +797,6 @@ class QualityCheck {
 		// char to int
 		int qual = qualCh - 33;
 
-		// lowest and highest
-		// gen big data
 		addPerPosAggVal(qual);
 
 		addTmpPosQual(qual);
@@ -838,30 +908,40 @@ class QualityCheck {
 
 	void sumUp() {
 
-		int i = 0;
+		genData_qc_pqd();
+		genData_qc_pbc();
+		genData_qc_bqd();
+		genData_qc_rqd();
+		genData_qc_gcd();
+	}
+
+	void genFiles() {
+		genFile_qc_pqd();
+		genFile_qc_pbc();
+		genFile_qc_bqd();
+		genFile_qc_rqd();
+		genFile_qc_gcd();
+	}
+
+	void genData_qc_pqd() {
+
 		for(auto &av : perPosAggVal) {
 
 			// key
-			av.key = i;
+			av.second.key = av.first;
 			// calculate median
-			calcMedian(av);
+			calcMedian(av.second);
 			// calculate mean
-			calcMean(av);
+			calcMean(av.second);
 			// calculate lowest, highest, q1 and q3
-			calcQuartile(av);
-			i++;
+			calcQuartile(av.second);
 		}
-
-		genData_position_base_composition();
-		genData_qc_bqd_data();
-		genData_qc_rqd_data();
-		genData_qc_gcd_data();
 	}
 
-	void genFile_position_quality_distribution() {
+	void genFile_qc_pqd() {
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_pqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_pqd_data-" + name + ".txt");
 
 		ofile	<< "graph_title" 	<< "\t" << "quality scores across all bases"
 			<< endl
@@ -883,16 +963,37 @@ class QualityCheck {
 
 		for (auto av: perPosAggVal) {
 
-			ofile 	<< av.key +1   << "\t"
-				<< av.mean     << "\t"
-				<< av.median   << "\t"
-				<< av.q1       << "\t"
-				<< av.q3       << "\t"
-				<< av.lowest   << "\t"
-				<< av.highest  
+			ofile 	<< av.second.key +1   << "\t"
+				<< av.second.mean     << "\t"
+				<< av.second.median   << "\t"
+				<< av.second.q1       << "\t"
+				<< av.second.q3       << "\t"
+				<< av.second.lowest   << "\t"
+				<< av.second.highest  
 				<< endl;
 		}
 
+		ofile.close();
+	}
+
+	void printMatrix() {
+
+		ofstream ofile;
+		ofile.open (outputFolderPath + "/matrix-" + name + ".txt");
+
+
+		for (auto a : perPosAggVal) {
+
+			ofile << a.first << ":\t";
+			auto qv = a.second.qualVals;
+
+			for (auto c : qv) {
+
+				ofile << c << "\t";
+			}
+
+			ofile << endl;
+		}
 		ofile.close();
 	}
 
@@ -906,7 +1007,7 @@ class QualityCheck {
 		return perQualCounts;
 	}
 
-	void genData_position_base_composition() {
+	void genData_qc_pbc() {
 
 		//map<char, vector<long>>	perPosReadsCounts;
 		map<char, map<int, long>> v1;
@@ -990,10 +1091,10 @@ class QualityCheck {
 		}
 	}
 
-	void genFile_position_base_composition() {
+	void genFile_qc_pbc() {
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_pbc_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_pbc_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tbase percentage composition along reads"
 			<< endl
@@ -1035,9 +1136,10 @@ class QualityCheck {
 			}
 		}
 
+		ofile.close();
 	}
 
-	void genData_qc_bqd_data() {
+	void genData_qc_bqd() {
 
 		long sum = 0;
 		long left = 0;
@@ -1065,12 +1167,12 @@ class QualityCheck {
 		}
 	}
 
-	void genFile_qc_bqd_data() {
+	void genFile_qc_bqd() {
 
 		//map<int, int> qc_bqd_data;
 
 		ofstream ofile;
-		ofile.open ("../data/output/qc_bqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_bqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\taccumulated base quality over all bases\n"
 			<< "allX\t" << qc_bqd_data.size() << "\n"
@@ -1087,16 +1189,17 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
-	void genData_qc_rqd_data() {
+	void genData_qc_rqd() {
 		qc_rqd_data = perQualReadsCounts;
 	}
 
-	void genFile_qc_rqd_data() {
+	void genFile_qc_rqd() {
 		
 		ofstream ofile;
-		ofile.open ("../data/output/qc_rqd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_rqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tquality score distribution over all sequences\n"
 			<< "allX\t" << qc_rqd_data.size() << "\n"
@@ -1113,17 +1216,18 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
-	void genData_qc_gcd_data() {
+	void genData_qc_gcd() {
 
 		qc_gcd_data = perQualReadsCounts;
 	}
 
-	void genFile_qc_gcd_data() {
+	void genFile_qc_gcd() {
 		
 		ofstream ofile;
-		ofile.open ("../data/output/qc_gcd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_gcd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tGC distribution over all sequences\n"
 			<< "allX\t" << qc_gcd_data.size() << "\n"
@@ -1140,6 +1244,7 @@ class QualityCheck {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
+		ofile.close();
 	}
 
 };

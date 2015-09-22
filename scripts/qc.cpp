@@ -1,56 +1,104 @@
-#include <iostream>
-#include "GZPair.h"
+#include "./DecompressedFiles.h"
+#include "./QualityCheck.h"
+#include <cstring>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-string call_id;
-string sample;
-
-string gz1_path;
-string gz2_path;
-string output_path;
-string log_path;
-string sample_name;
-int row_num = 0;
-bool is_compress;
-
-pair<double, double> calcQuantile(vector<int> v);
-
-
-struct myclass {
-	  bool operator()(int i,int j) { return (i<j);}
-} myobject;
-
+bool isReadsLine = true;
+void pMkdir(const char *dir);
 
 int main(int argc, char** argv) {
 
-	//int colNum = 0;
+	// input and output path
+	string inputPath  = "../data/output/decompressed_files/";
+	string outputPath = "../data/output/qc_result/";
+	struct stat info;
 
-	//if(argc > 1) {
+	// check arguments
+	if (argc != 3){
+		cerr 	<< "Argument Number Error!\n"
+			<< "Current Arg Number: " << argc << "\n"
+			<< "Usage:\n"
+			<< "\tqc <input_folder_path> <output_folder_path>"
+			<< endl;
+		exit(-1);
+	}
+	else {
+		inputPath = argv[1];
+		outputPath = argv[2];
+	}
 
-	//	colNum = atoi(argv[1]);
-	//}
+	// check output folder status
+	if( stat( outputPath.c_str(), &info ) != 0 ) {
+		// no such folder
+		cerr << "creating folder " << outputPath << " ..."<< endl;
+		pMkdir(outputPath.c_str());
+		cerr << "Done." << endl;
+	}
+	else if( info.st_mode & S_IFDIR ) {
 
-	string p1 = "../data/WGC_20m_n1.fq.gz";
-	string p2 = "../data/WGC_20m_n2.fq.gz";
-	string outputPath = "../data/output";
-	GZPair gp(p1, p2,outputPath);
+		// folder exists
+		cerr << "Dir: " << outputPath << " Exists." << endl;
+	}
+	else {
 
-	gp.testFunc();
-	//vector<string> lines1 = gp.getLines1();
+		// folder err
+		cerr << outputPath << " is no directory. " << endl;
+		exit(-1);
+	}
 
-	//QualityCheck qc = gp.returnQc();
+	// init 2 classes
+	DecompressedFiles df(inputPath);
+	QualityCheck qc(outputPath);
 
-	//qc.printMetrics();
+	// current string to be overwrited
+	string curLine;
 
-	//qc.sumUp();
+	while(df.nextLine(curLine)) {
 
-	//qc.genFile_position_quality_distribution();
-	//qc.genFile_position_base_composition();
-	//qc.genFile_qc_bqd_data();
-	//qc.genFile_qc_rqd_data();
-	//qc.genFile_qc_gcd_data();
+		// parse lines to qc
+		if (isReadsLine) {
+
+			qc.parseReadsLine(curLine);
+		}
+		else {
+
+			qc.parseQualLine(curLine);
+		}
+
+		isReadsLine = !isReadsLine;
+	}
+
+	// generate data and files
+	qc.sumUp();
+
+	qc.genFiles();
+
+	qc.printMatrix();
+
+	//qc.listQualVec();
+
+	
 
 
 	return 0;
 }
 
+void pMkdir(const char *dir) {
+	char tmp[256];
+	char *p = NULL;
+	size_t len;
 
+	snprintf(tmp, sizeof(tmp),"%s",dir);
+	len = strlen(tmp);
+	if(tmp[len - 1] == '/')
+		tmp[len - 1] = 0;
+	for(p = tmp + 1; *p; p++)
+		if(*p == '/') {
+			*p = 0;
+			mkdir(tmp, S_IRWXU);
+			*p = '/';
+		}
+	mkdir(tmp, S_IRWXU);
+}

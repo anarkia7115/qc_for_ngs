@@ -1,5 +1,8 @@
+#include <iostream>
+#include <fstream>
 #include <map>
 #include <algorithm>
+#include "AggVal.h"
 
 using namespace std;
 class QualityCheck {
@@ -64,26 +67,6 @@ class QualityCheck {
 	long lowQualReads 	= 0;
 	long passedQuals 	= 0;
 
-	// aggregate values
-	struct AggVal {
-
-		int key = 0;
-		long sum = 0;
-		long count = 0;
-		double mean = 0;
-
-		double median = 0;
-
-		int lowest = 9999;
-		int highest = 0;
-
-		double q1 = 0;
-		double q3 = 0;
-
-		vector<long> qualVals;
-		AggVal() :qualVals(50,0){}
-
-	} ;
 	int curPos = 0;
 
 	map<int, AggVal> perPosAggVal;
@@ -528,6 +511,9 @@ class QualityCheck {
 		}
 
 		cerr << "quality pos exceed!" << endl;
+		cerr << "vector size: " << v.size() << endl;
+		cerr << "finding pos: " << pos << endl;
+		cerr << "max index: " << sumIdx << endl;
 		exit(-1);
 	}
 
@@ -583,7 +569,8 @@ class QualityCheck {
 
 		vector<long> v = av.qualVals;
 
-		int n = av.count;
+		long n = av.count;
+		cout << "size: " << n << endl;
 
 		vector<double> probs = {0.25, 0.75};
 
@@ -594,11 +581,11 @@ class QualityCheck {
 			index.push_back(1 + (n - 1) * d);
 		}
 
-		vector<int> lo;
-		vector<int> hi;
-		vector<int> set;
+		vector<long> lo;
+		vector<long> hi;
+		vector<long> set;
 
-		int f = 0, c = 0;
+		long f = 0, c = 0;
 
 		for (auto d : index) {
 			f = floor(d);
@@ -613,7 +600,7 @@ class QualityCheck {
 		unique(set.begin(), set.end());
 
 		vector<double> qs;
-		map<int, int> careEle;
+		map<long, long> careEle;
 
 		// x <- sort(x, partial = unique(c(lo, hi)))
 		for (auto i : set) {
@@ -628,7 +615,7 @@ class QualityCheck {
 			qs.push_back(careEle[i]);
 		}
 
-		vector<int> diffIdx;
+		vector<long> diffIdx;
 
 		for (size_t idx = 0; idx < index.size(); idx++) {
 
@@ -645,8 +632,13 @@ class QualityCheck {
 
 		double IQR = qs.at(1) - qs.at(0);
 
+		cout	<< "qs size: " << qs.size() << endl;
+		cout	<< "qs : " << qs[0] << ", " << qs[1] << endl;
 		double lowest = qs.at(0) - 1.5 * IQR;
 		double highest = qs.at(1) + 1.5 * IQR;
+		cout 	<< "lowest: "  << lowest  << "\t"
+			<< "highest: " << highest << "\t"
+			<< endl;
 
 		// min and max
 		//nth_element(v.begin(), v.begin(), v.end());
@@ -656,6 +648,10 @@ class QualityCheck {
 		//nth_element(v.begin(), v.end() - 1, v.end());
 		//double highestAbs = v.back();
 		double highestAbs = av.highest;
+
+		cout 	<< "lowest: "  << lowestAbs  << "\t"
+			<< "highest: " << highestAbs << "\t"
+			<< endl;
 
 		if(lowest < lowestAbs) {
 			lowest = lowestAbs;
@@ -680,6 +676,12 @@ class QualityCheck {
 	QualityCheck(string op) : perQualCounts(100, 0) {
 
 		this->outputFolderPath = op;
+	}
+
+	QualityCheck(string op, string n) : perQualCounts(100, 0) {
+
+		this->outputFolderPath = op;
+		this->name = n;
 	}
 
 	void listQualVec() {
@@ -938,10 +940,10 @@ class QualityCheck {
 		}
 	}
 
-	void genFile_qc_pqd() {
+	static void genFile_qc_pqd(map<int, AggVal> mat, string ofp, string n) {
 
 		ofstream ofile;
-		ofile.open (outputFolderPath + "/qc_pqd_data-" + name + ".txt");
+		ofile.open (ofp + "/qc_pqd_data-" + n + ".txt");
 
 		ofile	<< "graph_title" 	<< "\t" << "quality scores across all bases"
 			<< endl
@@ -961,7 +963,7 @@ class QualityCheck {
 			<< "highest"
 			<< endl;
 
-		for (auto av: perPosAggVal) {
+		for (auto av: mat) {
 
 			ofile 	<< av.second.key +1   << "\t"
 				<< av.second.mean     << "\t"
@@ -974,6 +976,11 @@ class QualityCheck {
 		}
 
 		ofile.close();
+	}
+
+	void genFile_qc_pqd() {
+
+		genFile_qc_pqd(this->perPosAggVal, this->outputFolderPath, this->name);
 	}
 
 	void printMatrix() {
@@ -1245,6 +1252,11 @@ class QualityCheck {
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
 		ofile.close();
+	}
+
+	void setPerPosAggVal(map<int, AggVal> mat) {
+
+		this->perPosAggVal = mat;
 	}
 
 };

@@ -3,3 +3,6 @@
 #
 ../bin/qc:./qc.cpp ./DecompressedFiles.h ./QualityCheck.h
 	g++ -O3 --std=c++11 ./qc.cpp -Wall -o ../bin/qc
+
+#../bin/test:./testMat.cpp ./QualityCheck.h ./Matrix.h
+#	g++ --std=c++11 ./testMat.cpp -Wall -o ../bin/test

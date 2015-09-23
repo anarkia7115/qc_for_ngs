@@ -492,6 +492,14 @@ class QualityCheck {
 
 		long sumIdx = 0;
 		int qual = 0;
+
+		// check lower bound
+		if (pos < 0) {
+			cerr << "quality pos exceed!" << endl;
+			cerr << "position number < 0" << endl;
+			exit(-1);
+		}
+
 		for(auto i : v) {
 
 			sumIdx += i;
@@ -570,7 +578,7 @@ class QualityCheck {
 		vector<long> v = av.qualVals;
 
 		long n = av.count;
-		cout << "size: " << n << endl;
+		//cout << "size: " << n << endl;
 
 		vector<double> probs = {0.25, 0.75};
 
@@ -632,13 +640,13 @@ class QualityCheck {
 
 		double IQR = qs.at(1) - qs.at(0);
 
-		cout	<< "qs size: " << qs.size() << endl;
-		cout	<< "qs : " << qs[0] << ", " << qs[1] << endl;
+		//cout	<< "qs size: " << qs.size() << endl;
+		//cout	<< "qs : " << qs[0] << ", " << qs[1] << endl;
 		double lowest = qs.at(0) - 1.5 * IQR;
 		double highest = qs.at(1) + 1.5 * IQR;
-		cout 	<< "lowest: "  << lowest  << "\t"
-			<< "highest: " << highest << "\t"
-			<< endl;
+		//cout 	<< "lowest: "  << lowest  << "\t"
+		//	<< "highest: " << highest << "\t"
+		//	<< endl;
 
 		// min and max
 		//nth_element(v.begin(), v.begin(), v.end());
@@ -649,9 +657,9 @@ class QualityCheck {
 		//double highestAbs = v.back();
 		double highestAbs = av.highest;
 
-		cout 	<< "lowest: "  << lowestAbs  << "\t"
-			<< "highest: " << highestAbs << "\t"
-			<< endl;
+		//cout 	<< "lowest: "  << lowestAbs  << "\t"
+		//	<< "highest: " << highestAbs << "\t"
+		//	<< endl;
 
 		if(lowest < lowestAbs) {
 			lowest = lowestAbs;

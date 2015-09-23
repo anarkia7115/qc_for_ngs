@@ -86,7 +86,7 @@ class QualityCheck {
 	} ;
 	int curPos = 0;
 
-	vector<AggVal> perPosAggVal;
+	map<int, AggVal> perPosAggVal;
 
 	//map<char, map<int, long> > positionBaseComposition;
 	//map<pair<char, int>, double> positionBaseComposition;

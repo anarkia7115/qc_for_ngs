@@ -17,8 +17,8 @@ class DecompressedFiles {
 		bool hasMoreLines = true;
 
 		size_t 	curFileNo = 0;
-		size_t	curLineNo = 0;
-		string 	curLine;
+		//size_t	curLineNo = 0;
+		vector<string> 	curLine;
 		string	readsLine1;
 		string	readsLine2;
 		string	qualLine1;
@@ -46,7 +46,7 @@ class DecompressedFiles {
 					fn = folderPath + "/" + ent->d_name;
 
 					// match ".out" file
-					if(fn.find(".out") != string::npos) {
+					if(fn.find("halvade") != string::npos) {
 
 						fileNames.push_back(fn);
 					}
@@ -57,13 +57,17 @@ class DecompressedFiles {
 				/* could not open directory */
 				perror ("Error in read Dir");
 			}
+			if (fileNames.size() == 0) {
+				perror ("no files read!");
+			}
 		}
 
 		// read next raw line
 		void readNextLine() {
 
 			// get next line
-			if(!getline(fread, curLine)) {
+			string l;
+			if(!getline(fread, l)) {
 			// if file has no more lines
 
 				// move to next file
@@ -82,6 +86,10 @@ class DecompressedFiles {
 			}
 			// if readLine success 
 			{
+				curLine.push_back(l);
+				for (int i = 1; i < 4; i++) {
+					getline(fread, l);
+				}
 				parseCurLine();
 			}
 
@@ -146,8 +154,48 @@ class DecompressedFiles {
 			// open file handle
 			fread.open(fileNames[curFileNo]);
 
+			// parse first 8 line;
+			parseHead();
+
 			// parse first line
-			readFirstLine();
+			//readFirstLine();
+		}
+
+		// parse head
+		// depend is double or single
+		void parseHead() {
+
+			vector<string> head;
+
+			string l;
+
+			for (int i = 0; i < 8; i++) {
+				if (getline(fread, l)) {
+
+					head.push_back(l);
+					//cout << l << endl;
+				}
+				else {
+
+					//cout << "read failed" << endl;
+					fread.close();
+					curFileNo++;
+					fread.open(fileNames[curFileNo]);
+					i--;
+				}
+			}
+
+			string info1 = head.at(0);
+			string info2 = head.at(4);
+			string sub1 = info1.substr(0, info1.find(' '));
+			string sub2 = info2.substr(0, info2.find(' '));
+
+			if (sub1.compare(sub2) == 0) {
+				isDouble = true;
+			}
+			else {
+				isDouble = false;
+			}
 		}
 
 		// read first line of the file, 

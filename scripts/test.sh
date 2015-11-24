@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./qc ./output/decompressed_files/ ./output/qc_result/
+./qc ../data/halvade_input/ ./output/qc_result/

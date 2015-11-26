@@ -1,4 +1,4 @@
-#include "./DecompressedFiles.h"
+#include "./HalvadeFiles.h"
 #include "./QualityCheck.h"
 #include <cstring>
 #include <dirent.h>
@@ -11,8 +11,8 @@ void pMkdir(const char *dir);
 int main(int argc, char** argv) {
 
 	// input and output path
-	string inputPath  = "../data/output/decompressed_files/";
-	string outputPath = "../data/output/qc_result/";
+	string inputPath; // = "../data/halvade_input/";
+	string outputPath; // = "../data/output/qc_result/";
 	struct stat info;
 
 	// check arguments
@@ -49,8 +49,10 @@ int main(int argc, char** argv) {
 	}
 
 	// init 2 classes
-	DecompressedFiles df(inputPath);
+	HalvadeFiles df(inputPath);
 	QualityCheck qc(outputPath);
+
+	//cout << inputPath << endl;
 
 	// current string to be overwrited
 	string curLine;

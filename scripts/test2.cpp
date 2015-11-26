@@ -1,4 +1,4 @@
-#include "./HalvadeFiles.h"
+#include "./DecompressedFiles.h"
 #include <string>
 #include <fstream>
 
@@ -8,13 +8,13 @@ int main(int argc, char** argv) {
 
 	string fp = "../data/halvade_input";
 	//string fn = "../data/halvade_input/halvade-0-0";
-	HalvadeFiles df(fp);
+	DecompressedFiles df(fp);
 	//vector<string> vs;
 	
 	string l;
 	while(df.nextLine(l)) {
 
-		cout << l << endl;
+		df.printCurLine();
 	}
 
 	return 0;

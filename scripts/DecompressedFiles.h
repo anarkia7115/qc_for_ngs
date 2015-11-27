@@ -46,7 +46,7 @@ class DecompressedFiles {
 					fn = folderPath + "/" + ent->d_name;
 
 					// match ".out" file
-					if(fn.find(".out") != string::npos) {
+					if(fn.find("halvade") != string::npos) {
 
 						fileNames.push_back(fn);
 					}
@@ -147,7 +147,48 @@ class DecompressedFiles {
 			fread.open(fileNames[curFileNo]);
 
 			// parse first line
-			readFirstLine();
+			//readFirstLine();
+		}
+
+		// parse first 8 lines
+		bool parseHead() {
+
+			string l;
+			vector<string> head;
+
+			for (int i = 0; i < 8; i++) {
+
+				if(getline(fread, l)){
+					head.push_back(l);
+				}
+				else {
+					// current file empty
+					// next file
+					fread.close();
+					curFileNo++;
+					fread.open(fileNames[curFileNo]);
+					i--;
+				}
+			}
+
+			// 0, 4
+			string info1 = head.at(0);
+			string info2 = head.at(4);
+			string sub1 = info1.substr(0, info1.find(' '));
+			string sub2 = info2.substr(0, info2.find(' '));
+			
+			//cout << sub1 << endl << sub2 << endl;
+
+			//cout << head.at(0) << endl << head.at(4) << endl;
+
+			if (sub1.compare(sub2) == 0) {
+
+				return true;
+			}
+			else {
+
+				return false;
+			}
 		}
 
 		// read first line of the file, 

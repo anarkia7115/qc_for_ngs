@@ -12,10 +12,12 @@ class QualityCheck {
 	// parameters
 	string outputFolderPath;
 
+	bool isFirstLine = true;
 	double rawLen 	= 0;
 	long rawReads 	= 0;
 	long rawBases 	= 0;
 	long rawGcBases	= 0;
+	long rawNBases 	= 0;
 
 	string name = "default";
 
@@ -786,6 +788,7 @@ class QualityCheck {
 					}
 				}
 				lineNBases++;
+				rawNBase++;
 				perPosReadsCounts['N'].at(genSen)++; 
 				//addTmpPosReads('N');
 				break;
@@ -814,29 +817,29 @@ class QualityCheck {
 
 		lineQualSum += qual;
 
-		//if(qual >= 30) {
-		//	q30Bases++;
-		//	q20Bases++;
-		//	q10Bases++;
-		//	q4Bases++;
-		//}
-		//else if(qual >= 20) {
-		//	q20Bases++;
-		//	q10Bases++;
-		//	q4Bases++;
-		//}
-		//else if(qual >= 10) {
-		//	q10Bases++;
-		//	q4Bases++;
-		//	lineLowQualBases++;
-		//}
-		//else if(qual >= 4) {
-		//	q4Bases++;
-		//	lineLowQualBases++;
-		//}
-		//else {
-		//	lineLowQualBases++;
-		//}
+		if(qual >= 30) {
+			q30Bases++;
+			q20Bases++;
+			q10Bases++;
+			q4Bases++;
+		}
+		else if(qual >= 20) {
+			q20Bases++;
+			q10Bases++;
+			q4Bases++;
+		}
+		else if(qual >= 10) {
+			q10Bases++;
+			q4Bases++;
+			lineLowQualBases++;
+		}
+		else if(qual >= 4) {
+			q4Bases++;
+			lineLowQualBases++;
+		}
+		else {
+			lineLowQualBases++;
+		}
 
 		curPos++;
 	}
@@ -890,6 +893,13 @@ class QualityCheck {
 		lineMeanQual = 0;
 		lineLowQualBases = 0;
 		curPos = 0;
+
+		// global first line
+		if (isFirstLine) {
+
+			rawLen = line.size();
+			isFirstLine = false;
+		}
 
 		// first iter
 		auto siter = line.begin();
@@ -1260,6 +1270,14 @@ class QualityCheck {
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
 		ofile.close();
+	}
+
+	void genFile_qc_summary() {
+
+		ofstream ofile;
+		ofile.open (outputFolderPath + "/qc_gcd_data-" + name + ".txt");
+
+		ofile << ""
 	}
 
 	void setPerPosAggVal(map<int, AggVal> mat) {

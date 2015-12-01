@@ -11,13 +11,14 @@ class QualityCheck {
 
 	// parameters
 	string outputFolderPath;
+	string gnomeVersion = "hg38";
 
-	bool isFirstLine = true;
-	double rawLen 	= 0;
+	long rawLen 	= 0;
 	long rawReads 	= 0;
 	long rawBases 	= 0;
 	long rawGcBases	= 0;
 	long rawNBases 	= 0;
+	long gnomeBaseTotal = 0;
 
 	string name = "default";
 
@@ -28,6 +29,7 @@ class QualityCheck {
 	long lineNBases  	= 0;
 	long lineBases		= 0;
 
+	bool isFirstRead = true;
 	bool isReadsOk 	= false;
 	long excessNReads 	= 0;
 	long passedReads 	= 0;
@@ -42,8 +44,11 @@ class QualityCheck {
 	long q4Bases	= 0;
 	long lineLowQualBases = 0;
 
+	double q30Rate = 0;
+	double q20Rate = 0;
+	double gcRate = 0;
 	double genomeCoverage = 0;
-	long meanDepth = 0;
+	double meanDepth = 0;
 	double mappedRate = 0;
 
 	map<char, vector<long>>	perPosReadsCounts;
@@ -486,6 +491,7 @@ class QualityCheck {
 		else {
 			isReadsOk = true;
 			passedReads++;
+			effectiveReads++;
 		}
 	}
 
@@ -788,7 +794,6 @@ class QualityCheck {
 					}
 				}
 				lineNBases++;
-				rawNBase++;
 				perPosReadsCounts['N'].at(genSen)++; 
 				//addTmpPosReads('N');
 				break;
@@ -852,6 +857,13 @@ class QualityCheck {
 		lineBases = 0;
 		genSen = 0;
 
+		// first line
+		if (isFirstRead) {
+
+			rawLen = line.size();
+			isFirstRead = !isFirstRead;
+		}
+
 		// first iter
 		auto siter = line.begin();
 		parseGene(*siter);
@@ -894,13 +906,6 @@ class QualityCheck {
 		lineLowQualBases = 0;
 		curPos = 0;
 
-		// global first line
-		if (isFirstLine) {
-
-			rawLen = line.size();
-			isFirstLine = false;
-		}
-
 		// first iter
 		auto siter = line.begin();
 		parseQual(*siter);
@@ -933,6 +938,7 @@ class QualityCheck {
 		genData_qc_bqd();
 		genData_qc_rqd();
 		genData_qc_gcd();
+		genData_qc_summary();
 	}
 
 	void genFiles() {
@@ -941,6 +947,7 @@ class QualityCheck {
 		genFile_qc_bqd();
 		genFile_qc_rqd();
 		genFile_qc_gcd();
+		genFile_qc_summary();
 	}
 
 	void genData_qc_pqd() {
@@ -1272,12 +1279,47 @@ class QualityCheck {
 		ofile.close();
 	}
 
+	void genData_qc_summary() {
+
+		effectiveBases = effectiveReads * rawLen;
+		effectiveRate  = effectiveBases / (double)rawBases;
+		q30Rate = q30Bases / (double)rawBases;
+		q20Rate = q20Bases / (double)rawBases;
+		gcRate  = rawGcBases / (double)rawBases;
+
+		if (gnomeVersion == "hg38") {
+
+			gnomeBaseTotal = 3209286105;
+		}
+		else if (gnomeVersion == "hg19") {
+			
+			gnomeBaseTotal = 3137161264;
+		}
+		else {
+
+			cerr << "Unknown Gnome Version: " << gnomeVersion << endl;
+			exit(-1);
+		}
+
+		meanDepth = rawLen * rawReads / (double)gnomeBaseTotal;
+	}
+
 	void genFile_qc_summary() {
 
 		ofstream ofile;
-		ofile.open (outputFolderPath + "/qc_gcd_data-" + name + ".txt");
+		ofile.open (outputFolderPath + "/qc_ss_data-" + name + ".txt");
 
-		ofile << ""
+		ofile 	<< "\tSample1" << "\n"
+			<< "Read_len\t" << rawLen << "\n"
+			<< "Raw_reads\t" << rawReads << "\n"
+			<< "Raw_bases\t" << rawBases << "\n"
+			<< "effictive_reads\t" << effectiveReads << "\n"
+			<< "effictive_bases\t" << effectiveBases << "\n"
+			<< "effective_rate\t" << effectiveRate << "\n"
+			<< "Q30\t" << q30Rate << "\n"
+			<< "Q20\t" << q20Rate << "\n"
+			<< "GC\t"  << gcRate  << "\n"
+			<< "Mean_depth\t" << meanDepth  << "X" << endl;
 	}
 
 	void setPerPosAggVal(map<int, AggVal> mat) {

@@ -1309,17 +1309,17 @@ class QualityCheck {
 		ofstream ofile;
 		ofile.open (outputFolderPath + "/qc_ss_data-" + name + ".txt");
 
-		ofile 	<< "\tSample1" << "\n"
-			<< "Read_len\t" << rawLen << "\n"
-			<< "Raw_reads\t" << rawReads << "\n"
-			<< "Raw_bases\t" << rawBases << "\n"
+		ofile 	<< "\tsample1" << "\n"
+			<< "read_len\t" << rawLen << "\n"
+			<< "raw_reads\t" << rawReads << "\n"
+			<< "raw_bases\t" << rawBases << "\n"
 			<< "effictive_reads\t" << effectiveReads << "\n"
 			<< "effictive_bases\t" << effectiveBases << "\n"
 			<< "effective_rate\t" << effectiveRate << "\n"
-			<< "Q30\t" << q30Rate << "\n"
-			<< "Q20\t" << q20Rate << "\n"
-			<< "GC\t"  << gcRate  << "\n"
-			<< "Mean_depth\t" << meanDepth  << "X" << endl;
+			<< "q30\t" << q30Rate << "\n"
+			<< "q20\t" << q20Rate << "\n"
+			<< "gc\t"  << gcRate  << "\n"
+			<< "mean_depth\t" << meanDepth  << "X" << endl;
 	}
 
 	void setPerPosAggVal(map<int, AggVal> mat) {

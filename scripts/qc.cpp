@@ -13,20 +13,22 @@ int main(int argc, char** argv) {
 	// input and output path
 	string inputPath; // = "../data/halvade_input/";
 	string outputPath; // = "../data/output/qc_result/";
+	string gcsId;
 	struct stat info;
 
 	// check arguments
-	if (argc != 3){
+	if (argc != 4){
 		cerr 	<< "Argument Number Error!\n"
 			<< "Current Arg Number: " << argc << "\n"
 			<< "Usage:\n"
-			<< "\tqc <input_folder_path> <output_folder_path>"
+			<< "\tqc <input_folder_path> <output_folder_path> <GCS_ID>"
 			<< endl;
 		exit(-1);
 	}
 	else {
 		inputPath = argv[1];
 		outputPath = argv[2];
+		gcsId = argv[3];
 	}
 
 	// check output folder status
@@ -50,7 +52,7 @@ int main(int argc, char** argv) {
 
 	// init 2 classes
 	HalvadeFiles df(inputPath);
-	QualityCheck qc(outputPath);
+	QualityCheck qc(outputPath, gcsId);
 
 	//cout << inputPath << endl;
 

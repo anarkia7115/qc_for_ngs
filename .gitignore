@@ -1,4 +1,4 @@
 *~
-data/
-bin/qc
-bin/test
+/data/
+/bin/qc
+/bin/test

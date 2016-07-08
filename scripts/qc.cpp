@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-bool isReadsLine = true;
+//bool isReadsLine = true;
 void pMkdir(const char *dir);
 
 int main(int argc, char** argv) {
@@ -58,20 +58,25 @@ int main(int argc, char** argv) {
 
 	// current string to be overwrited
 	string curLine;
+    char lt;
 
-	while(df.nextLine(curLine)) {
+	while(df.nextLine(curLine, lt)) {
 
 		// parse lines to qc
-		if (isReadsLine) {
+        cout << curLine << endl;
 
-			qc.parseReadsLine(curLine);
-		}
-		else {
+        switch(lt) {
+            case 'r':
+                qc.parseReadsLine(curLine);
+                break;
 
-			qc.parseQualLine(curLine);
-		}
+            case 'q':
+                qc.parseQualLine(curLine);
+                break;
 
-		isReadsLine = !isReadsLine;
+            default:
+                cerr << "Unknown Line Type." << endl;
+        }
 	}
 
 	// generate data and files

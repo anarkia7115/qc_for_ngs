@@ -1063,7 +1063,7 @@ class QualityCheck {
 						make_pair(i, v[i]));
 			}
 
-			for (int i = 9; i < 149; i++) {
+			for (int i = 9; i < rawLen - 1; i++) {
 
 				if(sen == 0) {
 					key = i;
@@ -1083,7 +1083,7 @@ class QualityCheck {
 			}
 
 			v1[gene].insert(
-					make_pair(149, v[149]));
+					make_pair(rawLen - 1, v[rawLen - 1]));
 
 		}
 
@@ -1153,7 +1153,7 @@ class QualityCheck {
 
 		map<int, map<char, double>>::iterator it;
 
-		for (int i = 0; i < 150; i++) {
+		for (int i = 0; i < rawLen; i++) {
 
 			it = g.find(i);
 			if(it != g.end()) {
@@ -1295,6 +1295,8 @@ class QualityCheck {
 			
 			gnomeBaseTotal = 3137161264;
 		}
+        else if (gnomeVersion == "peculiar") {
+        }
 		else {
 
 			cerr << "Unknown Gnome Version: " << gnomeVersion << endl;

@@ -20,8 +20,11 @@ class HalvadeFiles {
 		size_t 	curFileNo = 0;
 		//size_t	curLineNo = 0;
 		vector<string> 	curLine;
-		string	readsLine;
-		string	qualLine;
+		string readsLine;
+		string  qualLine;
+
+        // lineType in {r, q}
+        char lineType = 'r';
 
 		// seperator
 		const char sep1 = 168;
@@ -46,7 +49,7 @@ class HalvadeFiles {
 
 					//cout << ent->d_name << endl;
 					// match ".out" file
-					if(string(ent->d_name).find("halvade") != string::npos) {
+					if(string(ent->d_name).find("fq") != string::npos) {
 
 						//cout << fn << endl;
 						fileNames.push_back(fn);
@@ -127,6 +130,7 @@ class HalvadeFiles {
 			getFileNames();
 
 			// open file handle
+            cout << curFileNo << endl;
 			fread.open(fileNames[curFileNo]);
 
 			// parse first 8 line;
@@ -182,20 +186,29 @@ class HalvadeFiles {
 		}
 
 		// get next formatted line
-		bool nextLine(string &rtLine) {
+		bool nextLine(string &rtLine, char &lt) {
 
-			// all lines read
-			// line number exceed
-			if(isReadsLine) {
+            // return current line type read
+            lt = lineType;
 
-				readNextLine();
-				isReadsLine = false;
-				rtLine = readsLine;
-			}
-			else {
-				rtLine = qualLine;
-				isReadsLine = true;
-			}
+            // read line of current line type
+            // set line type pointing to next line
+            switch(lineType) {
+                case 'r':
+                    readNextLine();
+                    lineType = 'q';
+                    rtLine = readsLine;
+                    break;
+
+                case 'q':
+                    lineType = 'r';
+                    rtLine = qualLine;
+                    break;
+
+                default:
+                    perror ("Unknown Line Type.");
+                    
+            }
 
 			if(hasMoreLines == false) {
 

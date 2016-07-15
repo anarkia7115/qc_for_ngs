@@ -24,22 +24,15 @@ class BedFile {
             fread.open(bedPath);
         }
 
-        long regionDiff(string l) {
-            
-            istringstream iss(l);
-            iss >> chrName >> r1 >> r2;
-            return r2 - r1;
+        long sumRegionDiff() {
+            long diff = 0;
+            long sum = 0;
+            while (fread >> chrName >> r1 >> r2) {
+
+                diff = r2 - r1;
+                sum += diff;
+            }
+            return sum;
         }
         
-        bool nextDiffRegion() {
-
-            if (hasMoreLine) {
-                // get next line, 
-            }
-            else {
-                return false;
-            }
-
-            return rdiff;
-        }
 };

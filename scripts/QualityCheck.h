@@ -2,6 +2,7 @@
 #include <fstream>
 #include <map>
 #include <algorithm>
+#include "./BedFile.h"
 #include "AggVal.h"
 
 using namespace std;
@@ -692,12 +693,32 @@ class QualityCheck {
 	QualityCheck(string op) : perQualCounts(100, 0) {
 
 		this->outputFolderPath = op;
+        // default gnomeBaseTotal
+		if (gnomeVersion == "hg38") {
+
+			gnomeBaseTotal = 3209286105;
+		}
+		else if (gnomeVersion == "hg19") {
+			
+			gnomeBaseTotal = 3137161264;
+		}
+		else {
+
+			cerr << "Unknown Gnome Version: " << gnomeVersion << endl;
+			exit(-1);
+		}
 	}
 
-	QualityCheck(string op, string n) : perQualCounts(100, 0) {
+	QualityCheck(string op, string n) : QualityCheck(op) {
 
-		this->outputFolderPath = op;
 		this->name = n;
+	}
+
+	QualityCheck(string op, string n, string bfp) : QualityCheck(op, n) {
+
+        BedFile bf(bfp);
+
+        gnomeBaseTotal = bf.sumRegionDiff();
 	}
 
 	void listQualVec() {
@@ -1287,22 +1308,6 @@ class QualityCheck {
 		q20Rate = q20Bases / (double)rawBases;
 		gcRate  = rawGcBases / (double)rawBases;
 
-		if (gnomeVersion == "hg38") {
-
-			gnomeBaseTotal = 3209286105;
-		}
-		else if (gnomeVersion == "hg19") {
-			
-			gnomeBaseTotal = 3137161264;
-		}
-        else if (gnomeVersion == "peculiar") {
-        }
-		else {
-
-			cerr << "Unknown Gnome Version: " << gnomeVersion << endl;
-			exit(-1);
-		}
-
 		meanDepth = rawLen * rawReads / (double)gnomeBaseTotal;
 	}
 
@@ -1321,7 +1326,8 @@ class QualityCheck {
 			<< "qc_q30\t" << q30Rate << "\n"
 			<< "qc_q20\t" << q20Rate << "\n"
 			<< "qc_gc\t"  << gcRate  << "\n"
-			<< "qc_mean_depth\t" << meanDepth  << endl;
+			<< "qc_mean_depth\t" << meanDepth  << "\n"
+			<< "qc_gnome_base_total\t" << gnomeBaseTotal << endl;
 	}
 
 	void setPerPosAggVal(map<int, AggVal> mat) {

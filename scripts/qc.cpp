@@ -14,21 +14,34 @@ int main(int argc, char** argv) {
 	string inputPath; // = "../data/halvade_input/";
 	string outputPath; // = "../data/output/qc_result/";
 	string gcsId;
+    string bedFilePath;
+
+
+    bool hasBed = false;
+
 	struct stat info;
 
 	// check arguments
-	if (argc != 4){
+	if (argc > 5 || argc < 4){
 		cerr 	<< "Argument Number Error!\n"
 			<< "Current Arg Number: " << argc << "\n"
 			<< "Usage:\n"
-			<< "\tqc <input_folder_path> <output_folder_path> <GCS_ID>"
+			<< "\tqc <input_folder_path> <output_folder_path> <GCS_ID> [<Bed file>]"
 			<< endl;
 		exit(-1);
 	}
-	else {
+	else if (argc == 4){
 		inputPath = argv[1];
 		outputPath = argv[2];
 		gcsId = argv[3];
+        hasBed = false;
+	}
+	else if (argc == 5){
+		inputPath = argv[1];
+		outputPath = argv[2];
+		gcsId = argv[3];
+        hasBed = true;
+        bedFilePath = argv[4];
 	}
 
 	// check output folder status
@@ -52,9 +65,10 @@ int main(int argc, char** argv) {
 
 	// init 2 classes
 	HalvadeFiles df(inputPath);
-	QualityCheck qc(outputPath, gcsId);
 
-	//cout << inputPath << endl;
+    QualityCheck qc = hasBed ? 
+        QualityCheck(outputPath, gcsId, bedFilePath) : 
+        QualityCheck(outputPath, gcsId);
 
 	// current string to be overwrited
 	string curLine;
@@ -63,7 +77,7 @@ int main(int argc, char** argv) {
 	while(df.nextLine(curLine, lt)) {
 
 		// parse lines to qc
-        cout << curLine << endl;
+        //cout << curLine << endl;
 
         switch(lt) {
             case 'r':
@@ -76,6 +90,7 @@ int main(int argc, char** argv) {
 
             default:
                 cerr << "Unknown Line Type." << endl;
+                exit(-1);
         }
 	}
 

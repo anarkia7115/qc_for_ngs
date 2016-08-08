@@ -130,7 +130,7 @@ class HalvadeFiles {
 			getFileNames();
 
 			// open file handle
-            cout << "current file NO.: "<< curFileNo << endl;
+            //cout << "current file NO.: "<< curFileNo << endl;
 			fread.open(fileNames[curFileNo]);
 
 			// parse first 8 line;

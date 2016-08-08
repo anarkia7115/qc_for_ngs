@@ -15,6 +15,6 @@ struct AggVal {
 	double q3 = 0;
 
 	vector<long> qualVals;
-	AggVal() :qualVals(50,0){}
+	AggVal() :qualVals(51,0){}
 
 } ;

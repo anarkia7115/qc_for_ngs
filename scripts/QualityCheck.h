@@ -52,13 +52,13 @@ class QualityCheck {
 	double meanDepth = 0;
 	double mappedRate = 0;
 
-	map<char, vector<long>>	perPosReadsCounts;
-	map<char, vector<bool>>	tmp_perPosReadsCounts;
+	map<char, vector<long>>	mPerPosReadsCounts;
+	map<char, vector<bool>>	mTmp_perPosReadsCounts;
 
-	map<int, long, less<int>>	perGcReadsCounts;
-	map<int, long>	perNsReadsCounts;
-	map<int, long>	perBaseReadsCounts;
-	map<int, long>	perQualBasesCounts;
+	map<int, long, less<int>>	mPerGcReadsCounts;
+	map<int, long>	mPerNsReadsCounts;
+	map<int, long>	mPerBaseReadsCounts;
+	//map<int, long>	mPerQualBasesCounts;
 
 	vector<char> geneType = {'G', 'C', 'A', 'T', 'N'};
 
@@ -67,7 +67,7 @@ class QualityCheck {
 	vector<long> tmp_perPosQualCounts;
 
 	vector<long> perQualCounts;
-	map<int, long, std::less<int>> perQualReadsCounts;
+	map<int, long, std::less<int>> mPerQualReadsCounts;
 
 	int lineMeanQual 	= 0;
 	bool isQualOk		= false;
@@ -77,21 +77,21 @@ class QualityCheck {
 
 	int curPos = 0;
 
-	map<int, AggVal> perPosAggVal;
+	map<int, AggVal> mPerPosAggVal;
 
-	//map<char, map<int, long> > positionBaseComposition;
-	//map<pair<char, int>, double> positionBaseComposition;
-	map<int, map<char, double>> positionBaseComposition;
-	map<int, int,  less<int>> qc_bqd_data;
-	map<int, long, less<int>> qc_rqd_data;
-	map<int, long, less<int>> qc_gcd_data;
+	//map<char, map<int, long> > mPositionBaseComposition;
+	//map<pair<char, int>, double> mPositionBaseComposition;
+	map<int, map<char, double>> mPositionBaseComposition;
+	map<int, int,  less<int>> mQc_bqd_data;
+	map<int, long, less<int>> mQc_rqd_data;
+	map<int, long, less<int>> mQc_gcd_data;
 	
 
 	void addTmpPosReads(char targetKey) {
 
 		char key;
 
-		//cout << "perPosReadsCounts size: " << perPosReadsCounts.size() << endl;
+		//cout << "mPerPosReadsCounts size: " << mPerPosReadsCounts.size() << endl;
 		//cout << "key: " << endl;
 		for(	auto k : geneType ) {
 
@@ -100,10 +100,10 @@ class QualityCheck {
 			// pos ++
 			if(key == targetKey){
 
-				tmp_perPosReadsCounts[key].push_back(true);
+				mTmp_perPosReadsCounts[key].push_back(true);
 			}
 			else{
-				tmp_perPosReadsCounts[key].push_back(false);
+				mTmp_perPosReadsCounts[key].push_back(false);
 			}
 		}
 
@@ -120,12 +120,12 @@ class QualityCheck {
 
 			key = k;
 
-			auto totIter = perPosReadsCounts[key].begin();
-			auto tmpIter = tmp_perPosReadsCounts[key].begin();
+			auto totIter = mPerPosReadsCounts[key].begin();
+			auto tmpIter = mTmp_perPosReadsCounts[key].begin();
 
 			// 50% time on the for loop
-			for (   ; totIter != perPosReadsCounts[key].end() 
-				&& tmpIter != tmp_perPosReadsCounts[key].end()
+			for (   ; totIter != mPerPosReadsCounts[key].end() 
+				&& tmpIter != mTmp_perPosReadsCounts[key].end()
 				; totIter++) {
 
 				// if gene is on this pos
@@ -137,18 +137,18 @@ class QualityCheck {
 			}
 
 			// push back new to total, if tmp is not over
-			for (; tmpIter != tmp_perPosReadsCounts[key].end(); tmpIter++) {
+			for (; tmpIter != mTmp_perPosReadsCounts[key].end(); tmpIter++) {
 				if(*tmpIter){
-					perPosReadsCounts[key].push_back(1);
+					mPerPosReadsCounts[key].push_back(1);
 				}
 				else {
-					perPosReadsCounts[key].push_back(0);
+					mPerPosReadsCounts[key].push_back(0);
 				}
 			}
 		}
 
-		//cout << "tmp size: " << tmp_perPosReadsCounts.size() << endl;
-		tmp_perPosReadsCounts.clear();
+		//cout << "tmp size: " << mTmp_perPosReadsCounts.size() << endl;
+		mTmp_perPosReadsCounts.clear();
 	}
 */
 
@@ -185,64 +185,64 @@ class QualityCheck {
 
 	void addPerQualCounts(int qual) {
 
-		perQualCounts[qual]++;
+		perQualCounts.at(qual)++;
 	}
 
 	void addPerQualReadsCount() {
 
 		// if record exists
-		if(perQualReadsCounts.find(lineMeanQual) 
-				!= perQualReadsCounts.end()) {
+		if(mPerQualReadsCounts.find(lineMeanQual) 
+				!= mPerQualReadsCounts.end()) {
 
-			perQualReadsCounts[lineMeanQual] ++;
+			mPerQualReadsCounts[lineMeanQual] ++;
 			//cout << lineMeanQual << ": " 
-			//<< perQualReadsCounts[lineMeanQual] << endl;
+			//<< mPerQualReadsCounts[lineMeanQual] << endl;
 		}
 		else {
 
-			perQualReadsCounts[lineMeanQual] = 1;
+			mPerQualReadsCounts[lineMeanQual] = 1;
 			//cout << lineMeanQual << ": " 
-			//<< perQualReadsCounts[lineMeanQual] << endl;
+			//<< mPerQualReadsCounts[lineMeanQual] << endl;
 		}
 	}
 
 	void addPerGcReadsCounts() {
-		if(perGcReadsCounts.find(lineGcBases) 
-				!= perGcReadsCounts.end()) {
+		if(mPerGcReadsCounts.find(lineGcBases) 
+				!= mPerGcReadsCounts.end()) {
 
 			// add to orig record
-			perGcReadsCounts[lineGcBases] ++;
+			mPerGcReadsCounts[lineGcBases] ++;
 		}
 		else {
 
 			// assign to the record directly
-			perGcReadsCounts[lineGcBases] = 1;
+			mPerGcReadsCounts[lineGcBases] = 1;
 		}
 	}
 
 	void addPerNsReadsCounts() {
-		if(perNsReadsCounts.find(lineNBases) != perNsReadsCounts.end()) {
+		if(mPerNsReadsCounts.find(lineNBases) != mPerNsReadsCounts.end()) {
 
 			// add to orig record
-			perNsReadsCounts[lineNBases] ++;
+			mPerNsReadsCounts[lineNBases] ++;
 		}
 		else {
 
 			// assign to the record directly
-			perNsReadsCounts[lineNBases] = 1;
+			mPerNsReadsCounts[lineNBases] = 1;
 		}
 	}
 
 	void addPerBaseReadsCounts() {
-		if(perBaseReadsCounts.find(lineBases) != perBaseReadsCounts.end()) {
+		if(mPerBaseReadsCounts.find(lineBases) != mPerBaseReadsCounts.end()) {
 
 			// add to orig record
-			perBaseReadsCounts[lineBases] ++;
+			mPerBaseReadsCounts[lineBases] ++;
 		}
 		else {
 
 			// assign to the record directly
-			perBaseReadsCounts[lineBases] = 1;
+			mPerBaseReadsCounts[lineBases] = 1;
 		}
 	}
 
@@ -250,9 +250,15 @@ class QualityCheck {
 		// push value to the right position
 		int intervalNum = posToInterval(curPos);
 
-		AggVal &curAggVal = perPosAggVal[intervalNum];
+		AggVal &curAggVal = mPerPosAggVal[intervalNum];
 
-		curAggVal.qualVals[qual]++;
+        if (qual < 50) {
+            curAggVal.qualVals.at(qual)++;
+        }
+        else {
+            cerr << "qual exceed 49: current qual val [" << qual << "] adding to qual=50" << endl;
+            curAggVal.qualVals.at(50)++;
+        }
 
 		// count++
 		curAggVal.count++;
@@ -723,9 +729,9 @@ class QualityCheck {
 
 	void listQualVec() {
 		
-		// map<int, AggVal> perPosAggVal;
-		cout << "a size: " << perPosAggVal.size() << endl;
-		for(auto a : perPosAggVal) {
+		// map<int, AggVal> mPerPosAggVal;
+		cout << "a size: " << mPerPosAggVal.size() << endl;
+		for(auto a : mPerPosAggVal) {
 			cout << "key: " << a.first << endl;
 			cout << "qual count: " << a.second.count << endl;
 			cout << "vector size: " << a.second.qualVals.size() << endl;
@@ -746,8 +752,8 @@ class QualityCheck {
 
 	void printPosData(char key) {
 
-		//cout << "perPosReadsCounts[key] length: " << perPosReadsCounts[key].size() << endl;
-		for (auto i : perPosReadsCounts[key]) {
+		//cout << "mPerPosReadsCounts[key] length: " << mPerPosReadsCounts[key].size() << endl;
+		for (auto i : mPerPosReadsCounts[key]) {
 			cout << i << endl;
 		}
 
@@ -758,7 +764,7 @@ class QualityCheck {
 
 	bool parseGene(char gene) {
 		lineBases++;
-		size_t s = perPosReadsCounts[gene].size();
+		size_t s = mPerPosReadsCounts[gene].size();
 
 		switch(gene){
 
@@ -770,52 +776,52 @@ class QualityCheck {
 				if(s < genSen + 1) {
 					//cerr << genSen<< "size not full" << endl;
 					for(size_t i = 0; i < genSen - s + 1; i++) {
-						perPosReadsCounts['G'].push_back(0);
+						mPerPosReadsCounts['G'].push_back(0);
 					}
 				}
-				perPosReadsCounts['G'].at(genSen)++; 
+				mPerPosReadsCounts['G'].at(genSen)++; 
 				//addTmpPosReads('G');
 				break;
 			case 'C':
 				if(s < genSen + 1) {
 					//cerr << genSen<< "size not full" << endl;
 					for(size_t i = 0; i < genSen - s + 1; i++) {
-						perPosReadsCounts['C'].push_back(0);
+						mPerPosReadsCounts['C'].push_back(0);
 					}
 				}
 				lineGcBases++;
-				perPosReadsCounts['C'].at(genSen)++; 
+				mPerPosReadsCounts['C'].at(genSen)++; 
 				//addTmpPosReads('C');
 				break;
 			case 'A':
 				if(s < genSen + 1) {
 					//cerr << genSen<< "size not full" << endl;
 					for(size_t i = 0; i < genSen - s + 1; i++) {
-						perPosReadsCounts['A'].push_back(0);
+						mPerPosReadsCounts['A'].push_back(0);
 					}
 				}
-				perPosReadsCounts['A'].at(genSen)++; 
+				mPerPosReadsCounts['A'].at(genSen)++; 
 				//addTmpPosReads('A');
 				break;
 			case 'T':
 				if(s < genSen + 1) {
 					//cerr << genSen<< "size not full" << endl;
 					for(size_t i = 0; i < genSen - s + 1; i++) {
-						perPosReadsCounts['T'].push_back(0);
+						mPerPosReadsCounts['T'].push_back(0);
 					}
 				}
-				perPosReadsCounts['T'].at(genSen)++; 
+				mPerPosReadsCounts['T'].at(genSen)++; 
 				//addTmpPosReads('T');
 				break;
 			case 'N':
 				if(s < genSen + 1) {
 					//cerr << genSen<< "size not full" << endl;
 					for(size_t i = 0; i < genSen - s + 1; i++) {
-						perPosReadsCounts['N'].push_back(1);
+						mPerPosReadsCounts['N'].push_back(1);
 					}
 				}
 				lineNBases++;
-				perPosReadsCounts['N'].at(genSen)++; 
+				mPerPosReadsCounts['N'].at(genSen)++; 
 				//addTmpPosReads('N');
 				break;
 			default:
@@ -903,7 +909,7 @@ class QualityCheck {
 		// flush tmp vector
 		// 60% of the time
 		//flushTmpReads();
-		//tmp_perPosReadsCounts.clear();
+		//mTmp_perPosReadsCounts.clear();
 
 		// add line metrics to total
 		rawReads++;
@@ -973,7 +979,7 @@ class QualityCheck {
 
 	void genData_qc_pqd() {
 
-		for(auto &av : perPosAggVal) {
+		for(auto &av : mPerPosAggVal) {
 
 			// key
 			av.second.key = av.first;
@@ -1026,7 +1032,7 @@ class QualityCheck {
 
 	void genFile_qc_pqd() {
 
-		genFile_qc_pqd(this->perPosAggVal, this->outputFolderPath, this->name);
+		genFile_qc_pqd(this->mPerPosAggVal, this->outputFolderPath, this->name);
 	}
 
 	void printMatrix() {
@@ -1035,7 +1041,7 @@ class QualityCheck {
 		ofile.open (outputFolderPath + "/matrix-" + name + ".txt");
 
 
-		for (auto a : perPosAggVal) {
+		for (auto a : mPerPosAggVal) {
 
 			ofile << a.first << ":\t";
 			auto qv = a.second.qualVals;
@@ -1052,7 +1058,7 @@ class QualityCheck {
 
 	map<int, map<char, double>> getPositionBaseComposition() {
 
-		return positionBaseComposition;
+		return mPositionBaseComposition;
 	}
 
 	vector<long> getPerQualCounts() {
@@ -1062,10 +1068,10 @@ class QualityCheck {
 
 	void genData_qc_pbc() {
 
-		//map<char, vector<long>>	perPosReadsCounts;
+		//map<char, vector<long>>	mPerPosReadsCounts;
 		map<char, map<int, long>> v1;
-		//map<pair<char, int>, double> positionBaseComposition
-		//map<int, map<char, double>> positionBaseComposition
+		//map<pair<char, int>, double> mPositionBaseComposition
+		//map<int, map<char, double>> mPositionBaseComposition
 
 		char gene;
 		int  key;
@@ -1073,7 +1079,7 @@ class QualityCheck {
 
 		int sen = 0;
 
-		for (auto g : perPosReadsCounts) {
+		for (auto g : mPerPosReadsCounts) {
 
 			gene = g.first;
 			v   = g.second;
@@ -1081,7 +1087,7 @@ class QualityCheck {
 			for (int i = 0; i < 9; i++) {
 
 				v1[gene].insert(
-						make_pair(i, v[i]));
+						make_pair(i, v.at(i)));
 			}
 
 			for (int i = 9; i < rawLen - 1; i++) {
@@ -1100,11 +1106,11 @@ class QualityCheck {
 				}
 
 				v1[gene][key] 
-					+= v[i];
+					+= v.at(i);
 			}
 
 			v1[gene].insert(
-					make_pair(rawLen - 1, v[rawLen - 1]));
+					make_pair(rawLen - 1, v.at(rawLen - 1)));
 
 		}
 
@@ -1136,7 +1142,7 @@ class QualityCheck {
 			for (auto l : m.second) {
 				gene = l.first;
 
-				positionBaseComposition[key][gene] 
+				mPositionBaseComposition[key][gene] 
 					= (double) l.second
 					/ (double) sum
 					* 100;
@@ -1170,7 +1176,7 @@ class QualityCheck {
 			<< "N"
 			<< endl;
 
-		auto g = positionBaseComposition;
+		auto g = mPositionBaseComposition;
 
 		map<int, map<char, double>>::iterator it;
 
@@ -1197,9 +1203,9 @@ class QualityCheck {
 		long sum = 0;
 		long left = 0;
 		//map<int, long> perQualCounts;
-		//map<int, long> perQualReadsCounts;
+		//map<int, long> mPerQualReadsCounts;
 		vector<int> quals;
-		//map<int, int> qc_bqd_data;
+		//map<int, int> mQc_bqd_data;
 
 		for(auto l : perQualCounts) {
 
@@ -1211,9 +1217,9 @@ class QualityCheck {
 		int i = 0;
 		for(auto l : perQualCounts) {
 
-			qc_bqd_data[i] = (double(left) / double(sum)) * 100;
+			mQc_bqd_data[i] = (double(left) / double(sum)) * 100;
 
-			//cout << qc_bqd_data[l.first] << endl;
+			//cout << mQc_bqd_data[l.first] << endl;
 			//cout << l.first << " fraq: " << double(left)/double(sum) << endl;
 			left -= l;
 			i++;
@@ -1222,13 +1228,13 @@ class QualityCheck {
 
 	void genFile_qc_bqd() {
 
-		//map<int, int> qc_bqd_data;
+		//map<int, int> mQc_bqd_data;
 
 		ofstream ofile;
 		ofile.open (outputFolderPath + "/qc_bqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\taccumulated base quality over all bases\n"
-			<< "allX\t" << qc_bqd_data.size() << "\n"
+			<< "allX\t" << mQc_bqd_data.size() << "\n"
 			<< "allY\t1\n"
 			<< "labelX\tbase quality\n"
 			<< "labelY\tpercentage\n"
@@ -1238,7 +1244,7 @@ class QualityCheck {
 			<< "Count"
 			<< endl;
 
-		for (auto i : qc_bqd_data) {
+		for (auto i : mQc_bqd_data) {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
@@ -1246,7 +1252,7 @@ class QualityCheck {
 	}
 
 	void genData_qc_rqd() {
-		qc_rqd_data = perQualReadsCounts;
+		mQc_rqd_data = mPerQualReadsCounts;
 	}
 
 	void genFile_qc_rqd() {
@@ -1255,7 +1261,7 @@ class QualityCheck {
 		ofile.open (outputFolderPath + "/qc_rqd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tquality score distribution over all sequences\n"
-			<< "allX\t" << qc_rqd_data.size() << "\n"
+			<< "allX\t" << mQc_rqd_data.size() << "\n"
 			<< "allY\t1\n"
 			<< "labelX\tbase quality\n"
 			<< "labelY\tpercentage\n"
@@ -1265,7 +1271,7 @@ class QualityCheck {
 			<< "Count"
 			<< endl;
 
-		for (auto i : qc_rqd_data) {
+		for (auto i : mQc_rqd_data) {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
@@ -1274,7 +1280,7 @@ class QualityCheck {
 
 	void genData_qc_gcd() {
 
-		qc_gcd_data = perQualReadsCounts;
+		mQc_gcd_data = mPerQualReadsCounts;
 	}
 
 	void genFile_qc_gcd() {
@@ -1283,7 +1289,7 @@ class QualityCheck {
 		ofile.open (outputFolderPath + "/qc_gcd_data-" + name + ".txt");
 
 		ofile 	<< "graph_title\tGC distribution over all sequences\n"
-			<< "allX\t" << qc_gcd_data.size() << "\n"
+			<< "allX\t" << mQc_gcd_data.size() << "\n"
 			<< "allY\t1\n"
 			<< "labelX\tmean GC content (%)\n"
 			<< "labelY\tGC count per read\n"
@@ -1293,7 +1299,7 @@ class QualityCheck {
 			<< "Count"
 			<< endl;
 
-		for (auto i : qc_gcd_data) {
+		for (auto i : mQc_gcd_data) {
 
 			ofile 	<< i.first << "\t" << i.second << endl;
 		}
@@ -1332,7 +1338,7 @@ class QualityCheck {
 
 	void setPerPosAggVal(map<int, AggVal> mat) {
 
-		this->perPosAggVal = mat;
+		this->mPerPosAggVal = mat;
 	}
 
 };

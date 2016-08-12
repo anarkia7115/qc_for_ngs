@@ -293,7 +293,9 @@ class QualityCheck {
             return pos - pos % 5;
         }
         else {
-			cerr << "unkonw position!" << endl;
+            cerr << "raw length: " << rawLen << endl;
+            cerr << "pos: " << pos << endl;
+			cerr << "unknown position!" << endl;
 			exit(-1);
 		}
 

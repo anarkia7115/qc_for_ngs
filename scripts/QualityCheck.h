@@ -653,6 +653,11 @@ class QualityCheck {
             }
         }
         // second loop to erase? TODO
+        for (auto& av : vPos2AggVal) {
+            if (av.getKey() != -1){
+                av.reduce();
+            }
+        }
 
 	}
 

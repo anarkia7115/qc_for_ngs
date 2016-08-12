@@ -179,13 +179,9 @@ int main(int argc, char** argv) {
 
 	qc.genFiles();
 
-	qc.printMatrix();
+	//qc.printMatrix();
 
 	//qc.listQualVec();
-
-	
-
-
 	return 0;
 }
 

@@ -1,5 +1,6 @@
 #include "./HalvadeFiles.h"
 #include "./QualityCheck.h"
+#include "./GuessEncoding.h"
 #include <cstring>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -63,22 +64,101 @@ int main(int argc, char** argv) {
 		exit(-1);
 	}
 
-	// init 2 classes
-	HalvadeFiles df(inputPath);
+    /*
+    // guess encoding
+    string guessEncodingLine;
 
-    QualityCheck qc = hasBed ? 
-        QualityCheck(outputPath, gcsId, bedFilePath) : 
-        QualityCheck(outputPath, gcsId);
+    // guessEncodingLine Pos from 0 to 3
+    int linePos = 0;
+
+    ifstream fqStream(inputPath);
+
+    GuessEncoding ge;
+
+    string encodingKey;
+
+    // check file open
+    if (fqStream.is_open()) {
+
+        // read quality guessEncodingLine parse to GuessEncoding
+        cout << "in is_open" << endl;
+        while (getline (fqStream, guessEncodingLine)) {
+
+            // only read quality guessEncodingLine
+            if (linePos != 3) {
+                linePos++;
+                continue;
+            }
+            else {
+                linePos = 0;
+            }
+
+            // parse to ge
+            if (ge.findEncoding(guessEncodingLine)) {
+                encodingKey = ge.getHitKey();
+                break;
+            }
+        }
+    }
+    else {
+        // file open fail
+        cout << "Unable to open file" << endl;
+    }
+
+    if (encodingKey.length() == 0) {
+        cerr << "encoding not found!"<< endl;
+        exit(1);
+    }
+    else {
+        cout << "encoding: " << encodingKey << endl;
+    }
+    fqStream.close();
+    */
+
+	// init file read classes
+	HalvadeFiles df(inputPath);
 
 	// current string to be overwrited
 	string curLine;
     char lt;
+
+    // guess encoding
+
+    GuessEncoding ge;
+
+    string encodingKey;
+
+	while(df.nextLine(curLine, lt)) {
+        if (lt == 'q') {
+            if (ge.findEncoding(curLine)) {
+                encodingKey = ge.getHitKey();
+                break;
+            }
+        }
+    }
+
+    if (encodingKey.length() == 0) {
+        cerr << "encoding not found!"<< endl;
+        exit(1);
+    }
+    else {
+        cout << "encoding: " << encodingKey << endl;
+    }
+
+    // rewind after guess
+    df.rewind();
+
+    // start qc process
+    QualityCheck qc = hasBed ? 
+        QualityCheck(outputPath, gcsId, encodingKey, bedFilePath) : 
+        QualityCheck(outputPath, gcsId, encodingKey);
 
 	while(df.nextLine(curLine, lt)) {
 
 		// parse lines to qc
         //cout << curLine << endl;
 
+        //cout << "in qc loop" << endl;
         switch(lt) {
             case 'r':
                 qc.parseReadsLine(curLine);

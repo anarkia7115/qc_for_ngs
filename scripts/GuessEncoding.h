@@ -20,12 +20,13 @@ class GuessEncoding {
 
     public :
         GuessEncoding() {
-            phredRange["base33"] = make_pair(33, 73);
+            phredRange["base33"] = make_pair(33, 74);
             phredRange["base64"] = make_pair(64, 105);
         }
 
         bool findEncoding(string qual_str) {
 
+            //cout << qual_str << endl;
             // narrow range
             getQualRange(qual_str);
 
@@ -69,7 +70,7 @@ class GuessEncoding {
 
         // refresh min and max
         for (int c : qual_str) {
-            cout << c << endl;
+            //cout << c << endl;
 
             if (c < qmin) {
                 qmin = c;

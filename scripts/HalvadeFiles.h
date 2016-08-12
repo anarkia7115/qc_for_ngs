@@ -79,6 +79,7 @@ class HalvadeFiles {
 				// if has no more files
 				if (curFileNo > fileNames.size() - 1) {
 					hasMoreLines = false;
+                    cout << "parsed final file, exit" << endl;
 					return;
 				}
 				// else get next file
@@ -86,6 +87,7 @@ class HalvadeFiles {
 					fread.close();
 
 					fread.open(fileNames[curFileNo]);
+                    cout << "parsing " << fileNames[curFileNo] << endl;
 					readNextLine();
 				}
 			}
@@ -132,10 +134,19 @@ class HalvadeFiles {
 			// open file handle
             //cout << "current file NO.: "<< curFileNo << endl;
 			fread.open(fileNames[curFileNo]);
+            cout << "parsing " << fileNames[curFileNo] << endl;
 
 			// parse first 8 line;
 			//parseHead();
 		}
+
+        void rewind() {
+            curFileNo = 0;
+            fread.close();
+            fread.open(fileNames[curFileNo]);
+            cout << "parsing " << fileNames[curFileNo] << endl;
+        }
+
 
 		// parse head
 		// depend is double or single

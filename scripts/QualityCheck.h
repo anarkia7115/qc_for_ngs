@@ -14,6 +14,10 @@ class QualityCheck {
 	string outputFolderPath;
 	string gnomeVersion = "hg38";
 
+    // phred encoding key
+    string encodingKey;
+    int phredShift = 0;
+
 	long rawLen 	= 0;
 	long rawReads 	= 0;
 	long rawBases 	= 0;
@@ -715,12 +719,26 @@ class QualityCheck {
 		}
 	}
 
-	QualityCheck(string op, string n) : QualityCheck(op) {
+	QualityCheck(string op, string n, string ek) : QualityCheck(op) {
 
 		this->name = n;
+        this->encodingKey = ek;
+
+        if (this->encodingKey == "base33"){
+                phredShift = 33;
+        }
+        else if (this->encodingKey == "base64"){
+                phredShift = 64;
+        }
+        else {
+				cerr 	<< "Error:\n\t" 
+					<< this->encodingKey
+					<< "\tunknown phred encoding?" << endl;
+				exit(1);
+        }
 	}
 
-	QualityCheck(string op, string n, string bfp) : QualityCheck(op, n) {
+	QualityCheck(string op, string n, string ek, string bfp) : QualityCheck(op, n, ek) {
 
         BedFile bf(bfp);
 
@@ -840,7 +858,7 @@ class QualityCheck {
 
 
 		// char to int
-		int qual = qualCh - 33;
+		int qual = qualCh - phredShift;
 
 		addPerPosAggVal(qual);
 
@@ -1090,7 +1108,7 @@ class QualityCheck {
 						make_pair(i, v.at(i)));
 			}
 
-			for (int i = 9; i < rawLen - 1; i++) {
+			for (unsigned int i = 9; i < v.size(); i++) {
 
 				if(sen == 0) {
 					key = i;
@@ -1109,8 +1127,14 @@ class QualityCheck {
 					+= v.at(i);
 			}
 
+            //cout << "gene: " <<             gene << endl;
+            //cout << "v.size(): " <<         v.size() << endl;
+            //cout << "rawLen - 1: " <<       rawLen - 1 << endl;
+            //cout << "v.at(rawLen - 1): " << v.at(rawLen - 1) << endl;
+            //cout << "v1.size(): " <<        v1.size() << endl;
 			v1[gene].insert(
-					make_pair(rawLen - 1, v.at(rawLen - 1)));
+					make_pair(v.size() - 1, v.at(v.size() - 1)));
+            //cout << "after insert" << endl;
 
 		}
 

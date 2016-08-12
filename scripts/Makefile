@@ -3,7 +3,7 @@
 #
 all : ../bin/test ../bin/qc
 
-../bin/qc:./qc.cpp ./HalvadeFiles.h ./QualityCheck.h
+../bin/qc:./qc.cpp ./GuessEncoding.h ./HalvadeFiles.h ./QualityCheck.h
 	g++ -O3 -g --std=c++11 ./qc.cpp -Wall -o ../bin/qc
 
 ../bin/test:./test.cpp ./GuessEncoding.h

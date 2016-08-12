@@ -14,10 +14,9 @@ int main(int argc, char** argv) {
     string base33Fq = "../data/fq/base33.fq";
     string base64Fq = "../data/fq/base64.fq";
 
-    string line;
+    string guessEncodingLine;
 
-
-    // line Pos from 0 to 3
+    // guessEncodingLine Pos from 0 to 3
     int linePos = 0;
 
     ifstream fqStream(base64Fq);
@@ -29,10 +28,10 @@ int main(int argc, char** argv) {
     // check file open
     if (fqStream.is_open()) {
 
-        // read quality line parse to GuessEncoding
-        while (getline (fqStream, line)) {
+        // read quality guessEncodingLine parse to GuessEncoding
+        while (getline (fqStream, guessEncodingLine)) {
 
-            // only read quality line
+            // only read quality guessEncodingLine
             if (linePos != 3) {
                 linePos++;
                 continue;
@@ -42,7 +41,7 @@ int main(int argc, char** argv) {
             }
 
             // parse to ge
-            if (ge.findEncoding(line)) {
+            if (ge.findEncoding(guessEncodingLine)) {
                 encodingKey = ge.getHitKey();
                 break;
             }

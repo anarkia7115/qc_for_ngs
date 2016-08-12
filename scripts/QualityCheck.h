@@ -79,9 +79,9 @@ class QualityCheck {
 	long lowQualReads 	= 0;
 	long passedQuals 	= 0;
 
-	int curPos = 0;
+	unsigned int curPos = 0;
 
-	map<int, AggVal> mPerPosAggVal;
+	vector<AggVal> vPos2AggVal;
 
 	//map<char, map<int, long> > mPositionBaseComposition;
 	//map<pair<char, int>, double> mPositionBaseComposition;
@@ -252,34 +252,23 @@ class QualityCheck {
 
 	void addPerPosAggVal(int qual) {
 		// push value to the right position
-		int intervalNum = posToInterval(curPos);
+		//int intervalNum = posToInterval(curPos);
 
-		AggVal &curAggVal = mPerPosAggVal[intervalNum];
+        // construct if not long enough
+        if (vPos2AggVal.size() < curPos + 1) {
+            for (unsigned int i = vPos2AggVal.size(); i < curPos + 1; i++) {
+                vPos2AggVal.emplace_back();
+            }
+        }
+		AggVal &curAggVal = vPos2AggVal.at(curPos);
 
         if (qual < 50) {
-            curAggVal.qualVals.at(qual)++;
+            curAggVal.add(qual);
         }
         else {
             cerr << "qual exceed 49: current qual val [" << qual << "] adding to qual=50" << endl;
-            curAggVal.qualVals.at(50)++;
+            curAggVal.add(50);
         }
-
-		// count++
-		curAggVal.count++;
-
-		// max and min
-		int &l = curAggVal.lowest;
-		int &h = curAggVal.highest;
-
-		if (qual < l) {
-
-			l = qual;
-		}
-
-		if (qual > h) {
-
-			h = qual;
-		}
 	}
 
 	int posToInterval(int pos) {
@@ -335,197 +324,6 @@ class QualityCheck {
 		}
 	}
 
-	// return qual
-	int getPosVal(vector<long> v, long pos) {
-
-		long sumIdx = 0;
-		int qual = 0;
-
-		// check lower bound
-		if (pos < 0) {
-			cerr << "quality pos exceed!" << endl;
-			cerr << "position number < 0" << endl;
-			exit(-1);
-		}
-
-		for(auto i : v) {
-
-			sumIdx += i;
-			//cout << "i: " << i << endl;
-			//cout << "sumIdx: " << sumIdx << endl;
-			//cout << "pos: " << pos << endl;
-			if(sumIdx > pos) {
-				//cout << "returned" << endl;
-				//cout << qual << endl;
-
-				return qual;
-			}
-
-			// this qual passed
-			// next quality
-			qual++;
-		}
-
-		cerr << "quality pos exceed!" << endl;
-		cerr << "vector size: " << v.size() << endl;
-		cerr << "finding pos: " << pos << endl;
-		cerr << "max index: " << sumIdx << endl;
-		exit(-1);
-	}
-
-	void calcMedian(AggVal& av) {
-
-		vector<long> v = av.qualVals;
-
-		double median;
-		size_t size = av.count;
-
-		double a = 0, b = 0;
-
-		if (size % 2 == 0) {
-
-			//std::nth_element(v.begin()
-			//		, v.begin() + size / 2 - 1, v.end());
-			//a = v[size / 2 - 1];
-			//b = v[size / 2];
-
-			a = getPosVal(v, size / 2 - 1);
-			b = getPosVal(v, size / 2);
-			median = (a + b) / 2;
-		}
-		else {
-			//std::nth_element(v.begin()
-			//		, v.begin() + size / 2, v.end());
-			//median = v[size / 2];
-			median = getPosVal(v, size / 2);
-		}
-
-		av.median  = median;
-	}
-
-	void calcMean(AggVal& av) {
-
-		vector<long> v = av.qualVals;
-
-		long sum = 0;
-		int qual = 0;
-
-		for(auto i : v) {
-
-			sum += i * qual;
-
-			// next qual
-			qual++;
-		}
-
-		av.mean = double(sum) / double(av.count);
-	}
-
-	void calcQuartile(AggVal& av) {
-
-		vector<long> v = av.qualVals;
-
-		long n = av.count;
-		//cout << "size: " << n << endl;
-
-		vector<double> probs = {0.25, 0.75};
-
-		vector<double> index;
-
-		for (auto d : probs) {
-
-			index.push_back(1 + (n - 1) * d);
-		}
-
-		vector<long> lo;
-		vector<long> hi;
-		vector<long> set;
-
-		long f = 0, c = 0;
-
-		for (auto d : index) {
-			f = floor(d);
-			c = ceil(d);
-			lo.push_back(f);
-			hi.push_back(c);
-
-			set.push_back(f);
-			set.push_back(c);
-		}
-
-		unique(set.begin(), set.end());
-
-		vector<double> qs;
-		map<long, long> careEle;
-
-		// x <- sort(x, partial = unique(c(lo, hi)))
-		for (auto i : set) {
-
-			//nth_element(v.begin(), v.begin() + i - 1 , v.end());
-			//careEle[i] = v.at(i - 1);
-			careEle[i] = getPosVal(v, i-1);
-		}
-
-		// qs <- x[lo]
-		for (auto i : lo) {
-			qs.push_back(careEle[i]);
-		}
-
-		vector<long> diffIdx;
-
-		for (size_t idx = 0; idx < index.size(); idx++) {
-
-			double diff = index.at(idx) - double(lo.at(idx));
-
-			if (diff > 0) {
-
-				// qs[i] <- (1 - h) * qs[i] + h * x[hi[i]]
-				qs.at(idx) = 
-				(1 - diff) * qs.at(idx) 
-				+ diff * careEle[hi.at(idx)];
-			}
-		}
-
-		double IQR = qs.at(1) - qs.at(0);
-
-		//cout	<< "qs size: " << qs.size() << endl;
-		//cout	<< "qs : " << qs[0] << ", " << qs[1] << endl;
-		double lowest = qs.at(0) - 1.5 * IQR;
-		double highest = qs.at(1) + 1.5 * IQR;
-		//cout 	<< "lowest: "  << lowest  << "\t"
-		//	<< "highest: " << highest << "\t"
-		//	<< endl;
-
-		// min and max
-		//nth_element(v.begin(), v.begin(), v.end());
-		//double lowestAbs = v.front();
-		double lowestAbs = av.lowest;
-
-		//nth_element(v.begin(), v.end() - 1, v.end());
-		//double highestAbs = v.back();
-		double highestAbs = av.highest;
-
-		//cout 	<< "lowest: "  << lowestAbs  << "\t"
-		//	<< "highest: " << highestAbs << "\t"
-		//	<< endl;
-
-		if(lowest < lowestAbs) {
-			lowest = lowestAbs;
-		}
-
-		if(highest > highestAbs) {
-			highest = highestAbs;
-		}
-
-		// q1 and q3
-		av.q1 = qs.at(0);
-		av.q3 = qs.at(1);
-
-		// lowest and highest
-		av.lowest = lowest;
-		av.highest = highest;
-	}
-
 	public:
 
 	// Constructor
@@ -576,12 +374,12 @@ class QualityCheck {
 
 	void listQualVec() {
 		
-		// map<int, AggVal> mPerPosAggVal;
-		cout << "a size: " << mPerPosAggVal.size() << endl;
-		for(auto a : mPerPosAggVal) {
-			cout << "key: " << a.first << endl;
-			cout << "qual count: " << a.second.count << endl;
-			cout << "vector size: " << a.second.qualVals.size() << endl;
+		// map<int, AggVal> vPos2AggVal;
+		cout << "a size: " << vPos2AggVal.size() << endl;
+		for(auto a : vPos2AggVal) {
+			cout << "key: " << a.getKey() << endl;
+			//cout << "qual count: " << a.second.getCount() << endl;
+			//cout << "vector size: " << a.second.qualVals.size() << endl;
 		}
 	}
 
@@ -826,20 +624,39 @@ class QualityCheck {
 
 	void genData_qc_pqd() {
 
-		for(auto &av : mPerPosAggVal) {
+        int maxReadsLen = vPos2AggVal.size();
+        AggVal* stopAggVal = NULL;
+        int stopKey = 0;
+        int stopInterval = 5;
 
-			// key
-			av.second.key = av.first;
-			// calculate median
-			calcMedian(av.second);
-			// calculate mean
-			calcMean(av.second);
-			// calculate lowest, highest, q1 and q3
-			calcQuartile(av.second);
-		}
+        // first loop set keys, and merge intervals
+        for (int pos = 0; pos < maxReadsLen; pos++) {
+            if ( (pos >=0 && pos < 10) || (pos >= maxReadsLen - 10 && pos < maxReadsLen) ) {
+                // first 10 and last 10
+                vPos2AggVal.at(pos).setKey(pos);
+            }
+            else if ( pos % stopInterval == 0 ) {
+                // interval stop
+                stopKey = pos;
+                stopAggVal = &vPos2AggVal.at(pos);
+                vPos2AggVal.at(pos).setKey(stopKey);
+            }
+            else if (pos >=0 && pos < maxReadsLen) {
+                // between intervals
+                vPos2AggVal.at(pos).setKey(-1);
+                // merge current pos value to stop AggVal
+                stopAggVal->merge(vPos2AggVal.at(pos));
+            }
+            else {
+                cerr << "unknown pos: " << pos << endl;
+                exit(1);
+            }
+        }
+        // second loop to erase? TODO
+
 	}
 
-	static void genFile_qc_pqd(map<int, AggVal> mat, string ofp, string n) {
+	static void genFile_qc_pqd(vector<AggVal> mat, string ofp, string n) {
 
 		ofstream ofile;
 		ofile.open (ofp + "/qc_pqd_data-" + n + ".txt");
@@ -864,13 +681,18 @@ class QualityCheck {
 
 		for (auto av: mat) {
 
-			ofile 	<< av.second.key +1   << "\t"
-				<< av.second.mean     << "\t"
-				<< av.second.median   << "\t"
-				<< av.second.q1       << "\t"
-				<< av.second.q3       << "\t"
-				<< av.second.lowest   << "\t"
-				<< av.second.highest  
+            // pass -1 keys
+            if(av.getKey() == -1) {
+                continue;
+            }
+
+			ofile 	<< av.getKey() +1   << "\t"
+				<< av.getMean()     << "\t"
+				<< av.getMedian()   << "\t"
+				<< av.getQ1()       << "\t"
+				<< av.getQ3()       << "\t"
+				<< av.getLowest()   << "\t"
+				<< av.getHighest()  
 				<< endl;
 		}
 
@@ -879,16 +701,17 @@ class QualityCheck {
 
 	void genFile_qc_pqd() {
 
-		genFile_qc_pqd(this->mPerPosAggVal, this->outputFolderPath, this->name);
+		genFile_qc_pqd(this->vPos2AggVal, this->outputFolderPath, this->name);
 	}
 
+    /*
 	void printMatrix() {
 
 		ofstream ofile;
 		ofile.open (outputFolderPath + "/matrix-" + name + ".txt");
 
 
-		for (auto a : mPerPosAggVal) {
+		for (auto a : vPos2AggVal) {
 
 			ofile << a.first << ":\t";
 			auto qv = a.second.qualVals;
@@ -902,6 +725,7 @@ class QualityCheck {
 		}
 		ofile.close();
 	}
+    */
 
 	map<int, map<char, double>> getPositionBaseComposition() {
 
@@ -1189,9 +1013,9 @@ class QualityCheck {
 			<< "qc_gnome_base_total\t" << gnomeBaseTotal << endl;
 	}
 
-	void setPerPosAggVal(map<int, AggVal> mat) {
+	void setPerPosAggVal(vector<AggVal> mat) {
 
-		this->mPerPosAggVal = mat;
+		this->vPos2AggVal = mat;
 	}
 
 };

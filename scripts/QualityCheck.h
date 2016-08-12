@@ -284,7 +284,7 @@ class QualityCheck {
 
 	int posToInterval(int pos) {
 		// push value to the right position
-        if ((pos <= 9 && pos >= 0) || (pos <= rawLen && pos >= rawLen - 10)) {
+        if ((pos <= 9 && pos >= 0) || (pos >= rawLen - 10)) {
             // if first 10 head and last 10 head
             return pos;
         }

@@ -20,7 +20,7 @@ class GuessEncoding {
 
     public :
         GuessEncoding() {
-            phredRange["base33"] = make_pair(33, 74);
+            phredRange["base33"] = make_pair(33, 83);
             phredRange["base64"] = make_pair(64, 105);
         }
 
@@ -79,6 +79,8 @@ class GuessEncoding {
                 qmax = c;
             }
         }
+	//cout << "qmin: " << qmin << endl;
+	//cout << "qmax: " << qmax << endl;
     }
 
     int getEncodingsInRange() {

@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
     string encodingKey;
 
 	while(df.nextLine(curLine, lt)) {
+		cout << "curLine in main: " << curLine << endl;
         if (lt == 'q') {
             if (ge.findEncoding(curLine)) {
                 encodingKey = ge.getHitKey();
@@ -156,7 +157,7 @@ int main(int argc, char** argv) {
 	while(df.nextLine(curLine, lt)) {
 
 		// parse lines to qc
-        //cout << curLine << endl;
+        cout << curLine << endl;
 
         //cout << "in qc loop" << endl;
         switch(lt) {

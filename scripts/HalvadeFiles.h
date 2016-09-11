@@ -93,7 +93,6 @@ class HalvadeFiles {
 
 					string curFileName = fileNames[curFileNo];
 					this->openFile(curFileName);
-                    cout << "parsing " << fileNames[curFileNo] << endl;
 					readNextLine();
 				}
 			}
@@ -150,13 +149,14 @@ class HalvadeFiles {
 
 			if (hasEnding(curFileName, ".gz")) {
 				this->isGz = true;
+				// init gzfread
+				gzfread.push(boost::iostreams::gzip_decompressor());
 			}
 			else {
 				this->isGz = false;
 			}
 
 			this->openFile(curFileName);
-			cout << "parsing " << fileNames[curFileNo] << endl;
 
 			// parse first 8 line;
 			//parseHead();
@@ -164,20 +164,17 @@ class HalvadeFiles {
 
 	istream& getline(string& l) {
 		if (this->isGz == true) {
-			cout << "curFileNo: " << this->curFileNo << endl;
-			cout << "in it!" << endl;
 			return std::getline(gzfread, l);
 		}
 		else {
-			cout << "wrong in it!" << endl;
 			return std::getline(fread, l);
 		}
 	}
 
 	void openFile(string fileName) {
 		if (this->isGz == true) {
+			cout << "parsing file: " << fileName << endl;
 			gzfile.open(fileName, std::ios_base::in | std::ios_base::binary);
-			gzfread.push(boost::iostreams::gzip_decompressor());
 			gzfread.push(gzfile);
 		}
 		else {
@@ -199,7 +196,6 @@ class HalvadeFiles {
             curFileNo = 0;
 	    this->closeFile();
 	    this->openFile(fileNames[curFileNo]);
-            cout << "parsing " << fileNames[curFileNo] << endl;
         }
 
 

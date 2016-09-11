@@ -760,10 +760,14 @@ class QualityCheck {
 			gene = g.first;
 			v   = g.second;
 
-			for (int i = 0; i < 9; i++) {
+			for (unsigned int i = 0; i < 9; i++) {
 
-				v1[gene].insert(
-						make_pair(i, v.at(i)));
+				if (v.size() <= i) {
+				v1[gene].insert( make_pair(i, 0));
+				}
+				else {
+				v1[gene].insert( make_pair(i, v.at(i)));
+				}
 			}
 
 			for (unsigned int i = 9; i < v.size(); i++) {

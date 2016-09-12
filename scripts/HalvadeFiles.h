@@ -22,6 +22,7 @@ class HalvadeFiles {
 		bool isReadsLine = true;
 		bool hasMoreLines = true;
 
+                long readLineNum = 0;
 		size_t 	curFileNo = 0;
 		//size_t	curLineNo = 0;
 		vector<string> 	curLine;
@@ -54,9 +55,9 @@ class HalvadeFiles {
 
 					//cout << ent->d_name << endl;
 					// match ".out" file
-					if(string(ent->d_name).find("fq") != string::npos) {
+					if(string(ent->d_name).find("fastq") != string::npos || string(ent->d_name).find("fq") != string::npos) {
 
-						//cout << fn << endl;
+						cout << fn << endl;
 						fileNames.push_back(fn);
 					}
 				}
@@ -163,6 +164,7 @@ class HalvadeFiles {
 		}
 
 	istream& getline(string& l) {
+                this->readLineNum++;
 		if (this->isGz == true) {
 			return std::getline(gzfread, l);
 		}
@@ -172,6 +174,7 @@ class HalvadeFiles {
 	}
 
 	void openFile(string fileName) {
+                this->readLineNum = 0;
 		if (this->isGz == true) {
 			cout << "parsing file: " << fileName << endl;
 			gzfile.open(fileName, std::ios_base::in | std::ios_base::binary);
@@ -183,6 +186,7 @@ class HalvadeFiles {
 	}
 
 	void closeFile() {
+                cout << this->readLineNum << " lines readed" << endl;
 		if (this->isGz == true) {
 			gzfile.close();
 			gzfread.pop();

@@ -64,57 +64,6 @@ int main(int argc, char** argv) {
 		exit(-1);
 	}
 
-    /*
-    // guess encoding
-    string guessEncodingLine;
-
-    // guessEncodingLine Pos from 0 to 3
-    int linePos = 0;
-
-    ifstream fqStream(inputPath);
-
-    GuessEncoding ge;
-
-    string encodingKey;
-
-    // check file open
-    if (fqStream.is_open()) {
-
-        // read quality guessEncodingLine parse to GuessEncoding
-        cout << "in is_open" << endl;
-        while (getline (fqStream, guessEncodingLine)) {
-
-            // only read quality guessEncodingLine
-            if (linePos != 3) {
-                linePos++;
-                continue;
-            }
-            else {
-                linePos = 0;
-            }
-
-            // parse to ge
-            if (ge.findEncoding(guessEncodingLine)) {
-                encodingKey = ge.getHitKey();
-                break;
-            }
-        }
-    }
-    else {
-        // file open fail
-        cout << "Unable to open file" << endl;
-    }
-
-    if (encodingKey.length() == 0) {
-        cerr << "encoding not found!"<< endl;
-        exit(1);
-    }
-    else {
-        cout << "encoding: " << encodingKey << endl;
-    }
-    fqStream.close();
-    */
-
 	// init file read classes
 	HalvadeFiles df(inputPath);
 

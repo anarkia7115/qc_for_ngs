@@ -4,7 +4,8 @@
 all : ../bin/test ../bin/qc
 
 ../bin/qc:./qc.cpp ./GuessEncoding.h ./HalvadeFiles.h ./QualityCheck.h
-	g++ -g -O3 --std=c++11 ./qc.cpp -Wall -lboost_iostreams -o ../bin/qc
+	g++ -O3 --std=c++11 ./qc.cpp -Wall -L ${HOME}/usr/lib -lboost_iostreams -o ../bin/qc
 
-../bin/test:./test.cpp ./GuessEncoding.h
-	g++ -g ./test.cpp --std=c++11 -Wall -o ../bin/test
+../bin/test:./testBoost.cpp
+	g++ -g ./testBoost.cpp --std=c++11 -L ${HOME}/usr/lib -lboost_iostreams -o ../bin/test
+#	g++ -g ./test.cpp --std=c++11 -Wall -o ../bin/test

@@ -3,6 +3,7 @@
 #include "./GuessEncoding.h"
 #include <cstring>
 #include <dirent.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -13,9 +14,10 @@ int main(int argc, char** argv) {
 
 	// input and output path
 	string inputPath; // = "../data/halvade_input/";
+	vector<string> vInputPath; 
 	string outputPath; // = "../data/output/qc_result/";
 	string gcsId;
-    string bedFilePath;
+    	string bedFilePath;
 
 
     bool hasBed = false;
@@ -64,7 +66,6 @@ int main(int argc, char** argv) {
 		exit(-1);
 	}
 
-	// init file read classes
 	HalvadeFiles df(inputPath);
 
 	// current string to be overwrited
@@ -83,8 +84,8 @@ int main(int argc, char** argv) {
                 encodingKey = ge.getHitKey();
                 break;
             }
-        }
-    }
+            }
+	}
 
     if (encodingKey.length() == 0) {
         cerr << "encoding not found!"<< endl;

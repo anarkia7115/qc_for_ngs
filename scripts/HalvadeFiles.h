@@ -1,4 +1,6 @@
 #include <string>
+#include <istream>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <dirent.h>
@@ -21,6 +23,8 @@ class HalvadeFiles {
 		bool isDouble = false;
 		bool isReadsLine = true;
 		bool hasMoreLines = true;
+
+		char delim = '|';
 
                 long readLineNum = 0;
 		size_t 	curFileNo = 0;
@@ -85,7 +89,8 @@ class HalvadeFiles {
 				// if has no more files
 				if (curFileNo > fileNames.size() - 1) {
 					hasMoreLines = false;
-                    cout << "parsed final file, exit" << endl;
+					this->closeFile();
+				    	cout << "parsed final file, exit" << endl;
 					return;
 				}
 				// else get next file
@@ -136,14 +141,24 @@ class HalvadeFiles {
 		}
 
 	public:
+
 		//Constructor
 		HalvadeFiles(string folderPath) {
 
-			// get folder path
-			this->folderPath = folderPath;
-
-			// get all file names in folder
-			getFileNames();
+			std::stringstream ss(folderPath);
+			if (folderPath.find(delim) != std::string::npos) {
+				//ss.str(folderPath);
+				string fileName;
+				while(std::getline(ss, fileName, delim)) {
+					fileNames.push_back(fileName);
+				}
+			}
+			else {
+				// get folder path
+				this->folderPath = folderPath;
+				// get all file names in folder
+				getFileNames();
+			}
 
 			// open file handle
 			string curFileName = fileNames[curFileNo];
@@ -163,13 +178,24 @@ class HalvadeFiles {
 			//parseHead();
 		}
 
-	istream& getline(string& l) {
-                this->readLineNum++;
+	bool getline(string& l) {
 		if (this->isGz == true) {
-			return std::getline(gzfread, l);
+			if(std::getline(gzfread, l)){
+				this->readLineNum++;
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else {
-			return std::getline(fread, l);
+			if(std::getline(fread, l)){
+				this->readLineNum++;
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 	}
 
@@ -181,6 +207,7 @@ class HalvadeFiles {
 			gzfread.push(gzfile);
 		}
 		else {
+			cout << "parsing file: " << fileName << endl;
 			fread.open(fileName);
 		}
 	}

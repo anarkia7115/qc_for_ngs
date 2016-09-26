@@ -30,24 +30,28 @@ class QualityCheck {
 	long effectiveReads = 0;
 	long effectiveBases = 0;
 
-	long lineGcBases	= 0;
-	long lineNBases  	= 0;
+	long lineQ30Num		= 0;
 	long lineBases		= 0;
+	long lineNBases  	= 0;
+	long lineGcBases	= 0;
+	long lineQualSum 	= 0;
+	long lineMeanQual 	= 0;
+	long lineLowQualBases 	= 0;
+	double lineQ30percentage 	= 0;
 
 	bool isFirstRead = true;
 	bool isReadsOk 	= false;
 	long excessNReads 	= 0;
 	long passedReads 	= 0;
+	long q30_80Reads 	= 0;
 	double effectiveRate 	= 0;
 
-	long lineQualSum 	= 0;
 	size_t genSen = 0;
 
 	long q30Bases	= 0;
 	long q20Bases	= 0;
 	long q10Bases 	= 0;
 	long q4Bases	= 0;
-	long lineLowQualBases = 0;
 
 	double q30Rate = 0;
 	double q20Rate = 0;
@@ -73,7 +77,6 @@ class QualityCheck {
 	vector<long> perQualCounts;
 	map<int, long, std::less<int>> mPerQualReadsCounts;
 
-	int lineMeanQual 	= 0;
 	bool isQualOk		= false;
 	float discard 		= 0.5;
 	long lowQualReads 	= 0;
@@ -495,6 +498,7 @@ class QualityCheck {
 		lineQualSum += qual;
 
 		if(qual >= 30) {
+			lineQ30Num++;
 			q30Bases++;
 			q20Bases++;
 			q10Bases++;
@@ -573,6 +577,7 @@ class QualityCheck {
 		//cout << "in parseQualLine." << endl;
 
 		// init
+		lineQ30Num = 0;
 		lineQualSum  = 0;
 		lineMeanQual = 0;
 		lineLowQualBases = 0;
@@ -594,6 +599,14 @@ class QualityCheck {
 
 		// flush tmp
 		flushTmpQual();
+
+		// calculate percentage of q30
+		lineQ30percentage = float(lineQ30Num)
+			  / float(line.size());
+
+		if (lineQ30percentage >= 0.8) {
+			q30_80Reads++;
+		}
 
 		lineMeanQual 
 			= round(float(lineQualSum) 
@@ -1019,7 +1032,8 @@ class QualityCheck {
 			<< "qc_q20\t" << q20Rate << "\n"
 			<< "qc_gc\t"  << gcRate  << "\n"
 			<< "qc_mean_depth\t" << meanDepth  << "\n"
-			<< "qc_gnome_base_total\t" << gnomeBaseTotal << endl;
+			<< "qc_gnome_base_total\t" << gnomeBaseTotal << "\n" 
+			<< "qc_q30_80\t" << q30_80Reads << endl;
 	}
 
 	void setPerPosAggVal(vector<AggVal> mat) {

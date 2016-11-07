@@ -1,7 +1,7 @@
 class GuessEncoding {
 
     // max quality parses
-    const int MAX_ITER = 1;
+    const int MAX_ITER = 100;
     const int MIN_INT = 0;
     const int MAX_INT = 200;
 

@@ -27,9 +27,14 @@ class BedFile {
         long sumRegionDiff() {
             long diff = 0;
             long sum = 0;
-            while (fread >> chrName >> r1 >> r2) {
+            string line;
+            //while (fread >> chrName >> r1 >> r2) {
+            while (getline(fread, line)) {
+                istringstream iss(line);
+                iss >> chrName >> r1 >> r2;
 
                 diff = r2 - r1;
+                //cout << diff << endl;
                 sum += diff;
             }
             return sum;
